@@ -18,24 +18,36 @@ export default {
 	setup(props, { emit }) {
 		const name = ref('Harris Matrix');
 
+		const selection = useSync(props, 'selection', emit);
         const layoutOptions = useSync(props, 'layoutOptions', emit);
-        
+		
         const { collection, filter, search } = toRefs(props);
-        
         const { info, primaryKeyField, fields: fieldsInCollection } = useCollection(collection);
-        const { items, loading, error } = useItems(collection, {
+        const { 
+				items,
+				loading,
+				error,
+				totalPages,
+				itemCount,
+				totalCount,
+				changeManualSort,
+				getItems,
+				getItemCount,
+				getTotalCount,			
+		 } = useItems(collection, {
             sort: primaryKeyField.field,
             limit: '-1',
             fields: ['us_id', 'us_name', 'us_category.*.*', 'children.*.*'],
             filter,
             search,
         });
-        
-        const spline = 'Ortho';
+		
+		
+		const spline = 'Ortho';
         const concentrated = false;
         const category = null;
-        
-        return { 
+		
+		return { 
             name,
             info,
             primaryKeyField,
@@ -47,8 +59,16 @@ export default {
             error,
             spline,
             concentrated,
-            category
+            category,
+			selection,
+			getItems,
+			refresh
         };
+		
+		function refresh() {
+			getItems();
+		}
+		
 	},
 };
 

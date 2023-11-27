@@ -18,19 +18,26 @@
 </style>
 
 <script>
+// https://github.com/codihaus/directus-extension-grid-layout/blob/main/src/options.vue
+
 import { onMounted } from 'vue';
 import { toRefs, toRef } from 'vue';
 import { instance } from "@viz-js/viz";
+import { useItems, useCollection, useSync } from '@directus/extensions-sdk';
+import { useApi, useStores } from '@directus/extensions-sdk';
 import svgPanZoom from "svg-pan-zoom";
+import { getCurrentInstance } from 'vue';
 
 var currentItems = [];
 var graphItems = [];
 var validTargets = [];
 var currentGraph = null;
 var currentSplines = 'ortho';
+var localRefreshVariabella = 'pippo';
 var currentConcentrated = false;
 var currentCategory = null;
 var nodesAttributes = {};
+console.log(localRefreshVariabella);
 
 function displayNodeInfos(node) {
     console.log(node);
@@ -115,7 +122,7 @@ function filterOut() {
 function prepareCategories() {
     const c_select = document.querySelector("#category-sel");
     while (c_select.firstChild) {
-      item.removeChild(item.firstChild)
+      c_select.removeChild(c_select.firstChild)
     }
     var nullopt = document.createElement("option");
     nullopt.text = "[NO CATEGORY]";
@@ -227,16 +234,25 @@ export default {
         category: {
             type: String,
 			default: null,
-        }
+        },
+		filter: {
+            type: String,
+            default: null,
+        },
+		refresh: Function
 	},
     watch: {
-        items: function(newVal, oldVal) {
-            currentItems = newVal;
-            prepareCategories();
-            filterOut(); //Filtering inline
-            prepareGraph();
-            displayGraph();
-        },
+		items: {
+		  deep: true,
+		  immediate: true,
+		  handler: function(newVal, oldVal) {
+             currentItems = newVal;
+             prepareCategories();
+             filterOut(); //Filtering inline
+             prepareGraph();
+             displayGraph(); 
+		  }
+		},
         spline: function(newVal, oldVal) {
             currentSplines = newVal;
             displayGraph();
@@ -250,12 +266,15 @@ export default {
             filterOut(); //Filtering inline
             prepareGraph();
             displayGraph();
-        }
+        },
+		filter: function(newVal, oldVal) {
+			setTimeout(function() { localRefreshVariabella(); }, 500);
+        },
     },
     setup(props, context) {
-        onMounted(() => {
-          // console.log(toRefs(props));
-        });
+	    onMounted(() => {
+			localRefreshVariabella = props.refresh;
+		});
     },
 };
 </script>
