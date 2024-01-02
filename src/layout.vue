@@ -43,8 +43,8 @@ function displayNodeInfos(node) {
     console.log(node);
     let nid = node.querySelector('title').textContent;
     let attrs = nodesAttributes[nid];
-    let tgt = "https://archeodirect.info/admin/content/suasa/" + attrs.id + "\"";
-    document.getElementById('info').innerHTML = "<a href=\"" + tgt + "\" target=\"_blank\" style=\"\">US " + nid + "</a>: " + attrs.text;
+    let tgt = "https://archeodirect.info/admin/content/contexts/" + attrs.id + "\"";
+    document.getElementById('info').innerHTML = "<a href=\"" + tgt + "\" target=\"_blank\" style=\"font-weight: bolder; cursor: pointer;\">US " + nid + "</a>: " + attrs.text;
 }
 
 function addZoomPan() {
@@ -76,7 +76,7 @@ function displayGraph() {
     let svg = viz.renderSVGElement(digraph);
     item.appendChild(svg);
     [].forEach.call(document.querySelectorAll('g.node'), el => {
-      el.addEventListener('click', function() {
+      el.addEventListener('mouseover', function() {
         displayNodeInfos(el);
       });
     });
@@ -89,7 +89,7 @@ function setValidTargtes() {
   validTargets = graphItems.reduce((obj, item) => {
     return {
       ...obj,
-      [item["us_id"]]: true,
+      [item["context_id"]]: true,
     };
   }, {});
 }
@@ -119,6 +119,8 @@ function filterOut() {
     }
 }
 
+// No inline category management in V2
+/*
 function prepareCategories() {
     const c_select = document.querySelector("#category-sel");
     while (c_select.firstChild) {
@@ -144,6 +146,7 @@ function prepareCategories() {
       updateCategory();
     });
 }
+*/
 
 function updateCategory() {
     let newVal = document.querySelector("#category-sel").value;
@@ -153,6 +156,8 @@ function updateCategory() {
     displayGraph();
 }
 
+// Old version: kept here just to take some quick example
+/*
 function prepareGraph() {
     let items = graphItems;
     setValidTargtes();
@@ -204,6 +209,56 @@ function prepareGraph() {
     currentGraph = nodes.join("\n") + "\n" + arcs.join("\n");
     console.log(currentGraph);
 }
+*/
+
+function prepareGraph() {
+    let items = graphItems;
+    setValidTargtes();
+    
+    nodesAttributes = {};
+    console.log('Vertex count: ' + items.length);
+
+    var nodes = [];
+    var arcs = [];
+
+    for (var eidx in items) {
+        let node = items[eidx];
+        var nodeText = node.description;
+        var nodeProps = ["shape=\"box\""];
+        
+		//Props here
+		
+		
+        nodes.push("\"" + node["context_id"] + "\" [" + nodeProps.join(",") + "];");
+        nodesAttributes[node["context_id"]] = {"id": node.id, "text": nodeText};
+
+        if (node["stratigraphy"]) {
+            for (var cix in node["stratigraphy"]) {
+                let child = node["stratigraphy"][cix];
+                var relation = "";
+				
+				if (child["other_context"] == null) continue;
+				let otherContextId = child["other_context"]["context_id"];
+				if (validTargets[otherContextId] == null) continue;
+				
+				if (child["relationship"]) {
+					if (['fills', 'covers', 'cuts'].indexOf(child["relationship"]) != -1) {
+						relation = "\"" + node["context_id"] + "\" -> \"" + otherContextId + "\";";
+					} else if (['is filled by', 'is covered by', 'is cut by'].indexOf(child["relationship"]) != -1) {
+						relation = "\"" + otherContextId + "\" -> \"" + node["context_id"] + "\";";
+					} else {
+						console.log("Correlation: to be done");
+					}
+				}
+				
+				if (arcs.indexOf(relation) == -1) arcs.push(relation);
+            }
+        }
+    }
+
+    currentGraph = nodes.join("\n") + "\n" + arcs.join("\n");
+    console.log(currentGraph);
+}
 
 export default {
 	inheritAttrs: false,
@@ -247,8 +302,8 @@ export default {
 		  immediate: true,
 		  handler: function(newVal, oldVal) {
              currentItems = newVal;
-             prepareCategories();
-             filterOut(); //Filtering inline
+			 //prepareCategories();
+			 filterOut(); //Filtering inline
              prepareGraph();
              displayGraph(); 
 		  }
@@ -277,4 +332,14 @@ export default {
 		});
     },
 };
+
+
+/*
+{context_id: 'BA-100', description: 'A layer of brown clayey soil matrix with concentra…ered by US 3; US101; covers US 102; US 103; US104', id: 1, stratigraphy: Array(5)}
+
+stratigraphy 0 -> {id: 1, relationship: 'is covered by', other_context: {…}, this_context: {…}}
+
+other context -> ['id', 'user_created', 'date_created', 'user_updated', 'date_updated', 'context_id', 'location_definition', 'description', 'site', 'complex', 'trench', 'context_type', 'material_culture', 'images', 'stratigraphy', 'finds', 'list_of_inventoried_finds']
+*/
+
 </script>

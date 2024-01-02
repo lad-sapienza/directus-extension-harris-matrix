@@ -37,7 +37,7 @@ export default {
 		 } = useItems(collection, {
             sort: primaryKeyField.field,
             limit: '-1',
-            fields: ['us_id', 'us_name', 'us_category.*.*', 'children.*.*'],
+            fields: ['context_id', 'description', 'stratigraphy.*.*'], //['us_id', 'us_name', 'us_category.*.*', 'children.*.*'],
             filter,
             search,
         });
