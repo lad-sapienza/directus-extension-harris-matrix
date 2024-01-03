@@ -2,7 +2,6 @@
     <div v-if="!loading">
         <div id="test-div-graph" style="width: 500px; height: 500px;"></div>
     </div>
-    <select id="category-sel"></select>
     <div id="info"></div>
 </template>
 
@@ -35,7 +34,7 @@ var currentGraph = null;
 var currentSplines = 'ortho';
 var localRefreshVariabella = 'pippo';
 var currentConcentrated = false;
-var currentCategory = null;
+var currentContextType = null;
 var nodesAttributes = {};
 console.log(localRefreshVariabella);
 
@@ -72,7 +71,7 @@ function displayGraph() {
       item.removeChild(item.firstChild)
     }
     let digraph = "digraph {splines=" + currentSplines + "; concentrated=" + currentConcentrated + "; " + currentGraph + " }";
-    console.log("DIGRAPH V2: " + digraph);
+    //console.log("DIGRAPH V2: " + digraph);
     let svg = viz.renderSVGElement(digraph);
     item.appendChild(svg);
     [].forEach.call(document.querySelectorAll('g.node'), el => {
@@ -96,120 +95,28 @@ function setValidTargtes() {
 
 //Better on nodes than on arcs (arcs should be O(N^2)) - Needed when filtering inline
 function filterOut() {
-    if (currentCategory) {
+    if (currentContextType) {
         graphItems = [];
         for (var eidx in currentItems) {
             let node = currentItems[eidx];
-            let nodeCategory = node.us_category;
-            if (nodeCategory) {
-                if (nodeCategory.id != currentCategory) {
-                    console.log("Discarding " + node.us_name + " (filtered out)");
+            let contextType = node.context_type;
+            if (contextType) {
+                if (contextType != currentContextType) {
+                    console.log("Discarding " + node["context_id"] + " (filtered out)");
                     continue;
                 } else {
-                    console.log("Enrolling " + node.us_name);
+                    console.log("Enrolling " + node["context_id"]);
                     graphItems.push(node);
                 }
             } else {
-                console.log("Discarding " + node.us_name + " (no category)");
-                continue;
+                console.log("Enrolling " + node["context_id"] + " (no category)");
+                graphItems.push(node);
             }
         }
     } else {
         graphItems = currentItems;
     }
 }
-
-// No inline category management in V2
-/*
-function prepareCategories() {
-    const c_select = document.querySelector("#category-sel");
-    while (c_select.firstChild) {
-      c_select.removeChild(c_select.firstChild)
-    }
-    var nullopt = document.createElement("option");
-    nullopt.text = "[NO CATEGORY]";
-    c_select.appendChild(nullopt);
-    var cat_presence = {};
-    for (var eidx in currentItems) {
-        let node = currentItems[eidx];
-        let nodeCategory = node.us_category;
-        if (nodeCategory) {
-            if (nodeCategory.id in cat_presence) { continue };
-            cat_presence[nodeCategory.id] = true;
-            var option = document.createElement("option");
-            option.text = nodeCategory.category_name;
-            option.value = "" + nodeCategory.id;
-            c_select.appendChild(option);
-        }
-    }
-    c_select.addEventListener("change", function() {
-      updateCategory();
-    });
-}
-*/
-
-function updateCategory() {
-    let newVal = document.querySelector("#category-sel").value;
-    currentCategory = parseInt(newVal);
-    filterOut(); //Filtering inline
-    prepareGraph();
-    displayGraph();
-}
-
-// Old version: kept here just to take some quick example
-/*
-function prepareGraph() {
-    let items = graphItems;
-    setValidTargtes();
-    
-    nodesAttributes = {};
-    console.log('Vertex count: ' + items.length);
-
-    var nodes = [];
-    var arcs = [];
-
-    for (var eidx in items) {
-        let node = items[eidx];
-        var nodeText = "";
-        var nodeProps = ["shape=\"box\""];
-        let nodeCategory = node.us_category;
-        if (nodeCategory) {
-            nodeProps = ["shape=\"" + nodeCategory.shape + "\""];
-            if ("fill_color" in nodeCategory) { nodeProps.push("fillcolor=\"" + nodeCategory.fill_color + "\""); }
-            if ("style" in nodeCategory) { nodeProps.push("style=\"" + nodeCategory.style + "\""); }
-            if ("category_name" in nodeCategory) { 
-                nodeProps.push("tooltip=\"" + nodeCategory.category_name + "\""); 
-                nodeText = nodeCategory.category_name;
-            }
-        } else {
-            console.log("Discarding " + node.us_name + " (no category)");
-            continue;
-        }
-
-        nodes.push(node.us_name + " [" + nodeProps.join(",") + "];");
-        nodesAttributes[node.us_name] = {"id": node.id, "text": nodeText};
-
-        if (node.children) {
-            for (var cix in node.children) {
-                let child = node.children[cix];
-                //Dangerous
-                for (var ch_key in child) {
-                    if (ch_key.startsWith('related_')) {
-                        let chUsName = child[ch_key]["us_name"];
-                        if (chUsName in validTargets) {
-                            arcs.push(node.us_name + " -> " + chUsName + ";");
-                        }
-                        break;
-                    }
-                }
-            }
-        }
-    }
-
-    currentGraph = nodes.join("\n") + "\n" + arcs.join("\n");
-    console.log(currentGraph);
-}
-*/
 
 function prepareGraph() {
     let items = graphItems;
@@ -286,7 +193,7 @@ export default {
 			type: Boolean,
 			default: false,
 		},
-        category: {
+        contextType: {
             type: String,
 			default: null,
         },
@@ -302,7 +209,6 @@ export default {
 		  immediate: true,
 		  handler: function(newVal, oldVal) {
              currentItems = newVal;
-			 //prepareCategories();
 			 filterOut(); //Filtering inline
              prepareGraph();
              displayGraph(); 
@@ -316,8 +222,9 @@ export default {
             currentConcentrated = newVal;
             displayGraph();
         },
-        category: function(newVal, oldVal) {
-            currentCategory = parseInt(newVal);
+        contextType: function(newVal, oldVal) {
+			console.log("Context type is now: " + newVal);
+            currentContextType = newVal;
             filterOut(); //Filtering inline
             prepareGraph();
             displayGraph();

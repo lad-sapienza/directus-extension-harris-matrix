@@ -1,9 +1,15 @@
 <script lang="ts">
 export default {
 	inheritAttrs: false,
-    setup(props) {
-        console.log("SPRINEZ: " + props.spline);
-    }
+    watch: {
+		items: {
+		  deep: true,
+		  immediate: true,
+		  handler: function(newVal, oldVal) {
+             //console.log("Pippopippo")
+		  }
+		},
+    },
 };
 </script>
 
@@ -16,16 +22,17 @@ interface Props {
 	activeFields: Field[];
 	spline: 'none' | 'line' | 'polyline' | 'curved' | 'ortho' | 'spline';
     concentrated: true | false;
-    category: string;
+    contextType: string;
+	contextTypes: Array;
 }
 
 const props = defineProps<Props>();
 
-const emit = defineEmits(['update:spline', 'update:activeFields', 'update:fields', 'update:concentrated', 'update:category']);
+const emit = defineEmits(['update:spline', 'update:activeFields', 'update:fields', 'update:concentrated', 'update:contextType']);
 
 const splineWritable = useSync(props, 'spline', emit);
 const concentratedWritable = useSync(props, 'concentrated', emit);
-const categoriesWritable = useSync(props, 'category', emit);
+const contextTypeWritable = useSync(props, 'contextType', emit);
 </script>
 
 <template>
@@ -65,40 +72,11 @@ const categoriesWritable = useSync(props, 'category', emit);
 		<div class="type-label">Concentrated</div>
 		<v-checkbox v-model="concentratedWritable" label="Concentred graph mode" class="block"></v-checkbox>
 	</div>
-    <div class="field" id="hm-categories">
-		<div class="type-label">Categories</div>
+    <div class="field" id="hm-ctype">
+		<div class="type-label">Context Types</div>
 		<v-select
-			v-model="categoriesWritable"
-			:items="[
-				{
-					text: '',
-					value: null,
-				},
-                {
-					text: 'Cat 1',
-					value: '1',
-				},
-                {
-					text: 'Cat 2',
-					value: '2',
-				},
-                {
-					text: 'Cat 3',
-					value: '3',
-				},
-                {
-					text: 'Cat 4',
-					value: '4',
-				},
-                {
-					text: 'Cat 5',
-					value: '5',
-				},
-                {
-					text: 'Cat 6',
-					value: '6',
-				},
-			]"
+			v-model="contextTypeWritable"
+			:items="contextTypes"
 		/>
 	</div>
 </template>

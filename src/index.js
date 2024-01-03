@@ -1,4 +1,4 @@
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { toRefs } from 'vue';
 import { useItems, useCollection, useSync } from '@directus/extensions-sdk';
 import LyoutOptions from './options.vue';
@@ -37,15 +37,35 @@ export default {
 		 } = useItems(collection, {
             sort: primaryKeyField.field,
             limit: '-1',
-            fields: ['context_id', 'description', 'stratigraphy.*.*'], //['us_id', 'us_name', 'us_category.*.*', 'children.*.*'],
+            fields: ['context_id', 'description', 'context_type', 'stratigraphy.*.*'],
             filter,
             search,
         });
 		
 		
+		const contextTypes = computed(() => {
+			var itz = [{"text": "Any", "value": null}]
+			var itzf = [];
+			console.log("Itimzz");
+			for (var ic in items.value) {
+				let item = items.value[ic];
+				if (item.context_type) {
+					if (itzf.indexOf(item.context_type) != -1) continue;
+					let it = {"text": item.context_type, "value": item.context_type};
+					console.log(it);
+					itzf.push(item.context_type);
+					itz.push(it);
+				}
+			}
+			return itz;
+		});
+		
+//			:item-title="title"
+//			:item-value="value"
+
 		const spline = 'Ortho';
         const concentrated = false;
-        const category = null;
+        const contextType = null;
 		
 		return { 
             name,
@@ -59,10 +79,11 @@ export default {
             error,
             spline,
             concentrated,
-            category,
+            contextType,
 			selection,
 			getItems,
-			refresh
+			refresh,
+			contextTypes
         };
 		
 		function refresh() {
