@@ -42,8 +42,8 @@ function displayNodeInfos(node) {
     console.log(node);
     let nid = node.querySelector('title').textContent;
     let attrs = nodesAttributes[nid];
-    let tgt = "https://archeodirect.info/admin/content/contexts/" + attrs.id + "\"";
-    document.getElementById('info').innerHTML = "<a href=\"" + tgt + "\" target=\"_blank\" style=\"font-weight: bolder; cursor: pointer;\">US " + nid + "</a>: " + attrs.text;
+    // TODO: the table name constext should be passed as variable
+    document.getElementById('info').innerHTML = `<a href="./content/contexts/${attrs.id}" target="_blank" style="font-weight: bolder; cursor: pointer;">US ${nid}</a>: ${attrs.text}`;
 }
 
 function addZoomPan() {
