@@ -206,7 +206,7 @@ function prepareGraph() {
 					} else if (child["relationship"] == "is the same as") {
 						relation = "\"" + otherContextId + "\" -> \"" + node["context_id"] + "\" [style=\"dashed\", color=\"blue\", dir=\"none\"];";
 					} else if (child["relationship"] == "is bound to") {
-						relation = "\"" + otherContextId + "\" -> \"" + node["context_id"] + "\" [style=\"dashed\", color=\"blue\", dir=\"none\"];";
+						relation = "\"" + otherContextId + "\" -> \"" + node["context_id"] + "\" [style=\"dotted\", color=\"blue\", dir=\"none\"];";
 					} else {
 						hmLog("Not managed: " + child["relationship"]);
 					}
