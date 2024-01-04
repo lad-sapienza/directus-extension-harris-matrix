@@ -276,8 +276,7 @@ export default {
             type: String,
             default: null,
         },
-		contextProps: String,
-		refresh: Function //UNUSED, BY NOW
+		contextProps: String
 	},
     watch: {
 		items: {

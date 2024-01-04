@@ -92,7 +92,7 @@ export default {
         };
 		
 		function refresh() { //UNUSED?
-			getItems();
+			//getItems();
 		}
 		
 	},
