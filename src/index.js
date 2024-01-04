@@ -44,7 +44,7 @@ export default {
 		
 		
 		const contextTypes = computed(() => {
-			var itz = [{"text": "Any", "value": null}]
+			var itz = [{"text": "Any", "value": null}, {"text": "None", "value": "---no-context"}]
 			var itzf = [];
 			// TODO: Apply array mapping for a better readability
 			for (var ic in items.value) {
@@ -59,6 +59,11 @@ export default {
 			return itz;
 		});
 		
+		
+		const contextProps = "layer$shape=box;style=filled;fillcolor=#ebebeb;tooltip=Layer\n\n" +
+							 "cut$shape=box;style=filled;color=red;fillcolor=white;tooltip=Cut\n\n" +
+							 "structure$shape=box;tooltip=Structure";
+							 
 		const spline = 'Ortho';
         const concentrated = false;
         const contextType = null;
@@ -81,7 +86,9 @@ export default {
 			getItems,
 			refresh,
 			contextTypes,
-			consoleLogging
+			consoleLogging,
+			collection,
+			contextProps
         };
 		
 		function refresh() { //UNUSED?

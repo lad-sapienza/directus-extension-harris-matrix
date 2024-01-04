@@ -6,8 +6,8 @@
 		<div id="info">
 			<table>
 				<tr>
-					<td id="us-link-td">pippo</td>
-					<td id="us-desc-td">pluto pluto pluto pluto pluto pluto pluto pluto pluto pluto pluto pluto pluto pluto pluto pluto pluto pluto pluto pluto pluto pluto pluto pluto pluto pluto pluto pluto pluto pluto pluto pluto pluto pluto </td>
+					<td id="us-link-td"><span id="us-link-aspan"></span><br><span id="us-link-cspan"></span></td>
+					<td id="us-desc-td"><span id="us-desc-dspan"></span></td>
 				</tr>
 			</table>
 		</div>
@@ -44,13 +44,11 @@
 	
 	#info table { width: 100%; margin-top: 10px; }
 	#info table td { vertical-align: top; }
-	#us-link-td { 
-		width: 15%;
-		text-align: right;
+	#us-link-td { width: 15%; text-align: right; padding-right: 15px; }
+	#us-link-aspan { 
 		font-weight: bolder;
 		text-decoration: underline;
 		font-size: 1.8em;
-		padding-right: 15px;
 	}
 </style>
 
@@ -65,6 +63,7 @@ import { useApi, useStores } from '@directus/extensions-sdk';
 import svgPanZoom from "svg-pan-zoom";
 import { getCurrentInstance } from 'vue';
 
+var collection = null;
 var currentItems = [];
 var graphItems = [];
 var validTargets = [];
@@ -74,13 +73,16 @@ var currentConcentrated = false;
 var currentContextType = null;
 var nodesAttributes = {};
 var consoleLogging = false;
+var contextProps = {};
 
 function displayNodeInfos(node) {
     hmLog("[NODE INFO: " + node + "]");
     let nid = node.querySelector('title').textContent;
     let attrs = nodesAttributes[nid];
-    let tgt = "https://archeodirect.info/admin/content/contexts/" + attrs.id + "\"";
-    //document.getElementById('info').innerHTML = "<a href=\"" + tgt + "\" target=\"_blank\" style=\"font-weight: bolder; cursor: pointer;\">US " + nid + "</a>: " + attrs.text;
+    document.getElementById('us-link-aspan').innerHTML = `<a href="./content/${collection}/${attrs.id}" target="_blank" style="cursor: pointer;">US ${nid}</a>`;
+	var cType = attrs.context_type == null ? "-" : attrs.context_type;
+	document.getElementById('us-link-cspan').innerHTML = `(<i>${cType}</i>)`;
+	document.getElementById('us-desc-dspan').innerHTML = `${attrs.text}`;
 }
 
 function addZoomPan() {
@@ -102,6 +104,9 @@ function addZoomPan() {
  
 
 function displayGraph() {
+  if (document.getElementById('us-link-aspan')) document.getElementById('us-link-aspan').innerHTML = "";
+  if (document.getElementById('us-link-lspan')) document.getElementById('us-link-lspan').innerHTML = "";
+  if (document.getElementById('us-desc-dspan')) document.getElementById('us-desc-dspan').innerHTML = "";
   instance().then(function(viz) {
     const item = document.querySelector("#div-graph");
     while (item.firstChild) {
@@ -112,7 +117,7 @@ function displayGraph() {
     let svg = viz.renderSVGElement(digraph);
     item.appendChild(svg);
     [].forEach.call(document.querySelectorAll('g.node'), el => {
-      el.addEventListener('mouseover', function() {
+      el.addEventListener('click', function() {
         displayNodeInfos(el);
       });
     });
@@ -169,12 +174,14 @@ function prepareGraph() {
         let node = items[eidx];
         var nodeText = node.description;
         var nodeProps = ["shape=\"box\""];
+		
+		if(node.context_type && contextProps[node.context_type] != null) {
+			hmLog("Adding " + contextProps[node.context_type] + " as node props");
+			nodeProps = contextProps[node.context_type];
+		}
         
-		//Props here
-		
-		
-        nodes.push("\"" + node["context_id"] + "\" [" + nodeProps.join(",") + "];");
-        nodesAttributes[node["context_id"]] = {"id": node.id, "text": nodeText};
+		nodes.push("\"" + node["context_id"] + "\" [" + nodeProps.join(",") + "];");
+        nodesAttributes[node["context_id"]] = {"id": node.id, "text": nodeText, "context_type": node.context_type}; //Could not figure out how to access images
 
         if (node["stratigraphy"]) {
             for (var cix in node["stratigraphy"]) {
@@ -208,6 +215,28 @@ function hmLog(message) {
 	if(consoleLogging != true) return;
 	console.log("[HMLOG] - " + message);
 }
+
+function parseCProps(cprops) {
+    hmLog("Parsing context props");
+    var dict = {};
+    let cps = cprops.split("\n");
+    for (var cpsi in cps) {
+        let cp = cps[cpsi].split("$");
+		if(cp.length != 2) continue;
+        dict[cp[0]] = [];
+        let propz = cp[1].split(";");
+        for (var propzi in propz) {
+		    var cprop = propz[propzi].split("=");
+            if(cprop.length != 2) continue;
+			cprop = cprop[0] + "=\"" + cprop[1] + "\"";
+            //hmLog("Adding '" + cprop + "' to " + cp[0]);
+			console.log("Adding '" + cprop + "' to " + cp[0]);
+            dict[cp[0]].push(cprop);
+        }
+    }
+    return dict;
+}
+
 
 export default {
 	inheritAttrs: false,
@@ -247,6 +276,7 @@ export default {
             type: String,
             default: null,
         },
+		contextProps: String,
 		refresh: Function //UNUSED, BY NOW
 	},
     watch: {
@@ -279,24 +309,24 @@ export default {
 			console.log("Console log: " + (newVal == true ? "ON" : "OFF"));
             consoleLogging = newVal;
         },
+		contextProps: function(newVal, oldVal) {
+			hmLog("Redoing context props");
+			contextProps = parseCProps(newVal);
+			prepareGraph();
+			displayGraph();
+        },
 		filter: function(newVal, oldVal) {
 			//NOOP
         },
     },
     setup(props, context) {
 	    onMounted(() => {
-			//NOOP
+			collection = props.collection;
+			console.log("Mounted: " + props.collection);
+			contextProps = parseCProps(props.contextProps);
+			console.log("Contexts Props: " + JSON.stringify(contextProps));
 		});
     },
 };
-
-
-/*
-{context_id: 'BA-100', description: 'A layer of brown clayey soil matrix with concentra…ered by US 3; US101; covers US 102; US 103; US104', id: 1, stratigraphy: Array(5)}
-
-stratigraphy 0 -> {id: 1, relationship: 'is covered by', other_context: {…}, this_context: {…}}
-
-other context -> ['id', 'user_created', 'date_created', 'user_updated', 'date_updated', 'context_id', 'location_definition', 'description', 'site', 'complex', 'trench', 'context_type', 'material_culture', 'images', 'stratigraphy', 'finds', 'list_of_inventoried_finds']
-*/
 
 </script>

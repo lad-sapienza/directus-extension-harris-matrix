@@ -10,20 +10,29 @@ interface Props {
     contextType: string;
 	contextTypes: Array;
 	consoleLogging: true | false;
+	contextProps: string;
 }
 
 const props = defineProps<Props>();
 
-const emit = defineEmits(['update:spline', 'update:activeFields', 'update:fields', 'update:concentrated', 'update:contextType', 'update:consoleLogging']);
+const emit = defineEmits(['update:spline', 'update:activeFields', 'update:fields', 'update:concentrated', 'update:contextType', 'update:consoleLogging', 'update:contextProps']);
 
 const splineWritable = useSync(props, 'spline', emit);
 const concentratedWritable = useSync(props, 'concentrated', emit);
 const contextTypeWritable = useSync(props, 'contextType', emit);
 const consoleLoggingWritable = useSync(props, 'consoleLogging', emit);
+const contextPropsWritable = useSync(props, 'contextProps', emit);
 </script>
 
 <template>
-	<div class="field">
+    <div class="field" id="hm-ctype">
+		<div class="type-label">Context Types</div>
+		<v-select
+			v-model="contextTypeWritable"
+			:items="contextTypes"
+		/>
+	</div>
+    <div class="field">
 		<div class="type-label">Spline</div>
 		<v-select
 			v-model="splineWritable"
@@ -59,12 +68,9 @@ const consoleLoggingWritable = useSync(props, 'consoleLogging', emit);
 		<div class="type-label">Concentrated</div>
 		<v-checkbox v-model="concentratedWritable" label="Concentred graph mode" class="block"></v-checkbox>
 	</div>
-    <div class="field" id="hm-ctype">
-		<div class="type-label">Context Types</div>
-		<v-select
-			v-model="contextTypeWritable"
-			:items="contextTypes"
-		/>
+    <div class="field" id="hm-cprops">
+		<div class="type-label">Context Properties</div>
+		<v-textarea v-model="contextPropsWritable"></v-textarea>
 	</div>
     <div class="field">
 		<div class="type-label">Console logging</div>
