@@ -75,6 +75,8 @@ var nodesAttributes = {};
 var consoleLogging = false;
 var contextProps = {};
 
+var refreshHandler = null;
+
 function displayNodeInfos(node) {
     hmLog("[NODE INFO: " + node + "]");
     let nid = node.querySelector('title').textContent;
@@ -105,7 +107,7 @@ function addZoomPan() {
 
 function displayGraph() {
   if (document.getElementById('us-link-aspan')) document.getElementById('us-link-aspan').innerHTML = "";
-  if (document.getElementById('us-link-lspan')) document.getElementById('us-link-lspan').innerHTML = "";
+  if (document.getElementById('us-link-cspan')) document.getElementById('us-link-cspan').innerHTML = "";
   if (document.getElementById('us-desc-dspan')) document.getElementById('us-desc-dspan').innerHTML = "";
   instance().then(function(viz) {
     const item = document.querySelector("#div-graph");
@@ -143,19 +145,21 @@ function filterOut() {
             let node = currentItems[eidx];
             let contextType = node.context_type;
             if (contextType) {
-                if (contextType != currentContextType) {
-                    hmLog("Discarding " + node["context_id"] + " (filtered out)");
-                    continue;
-                } else {
+                if (contextType == currentContextType) {
                     hmLog("Enrolling " + node["context_id"]);
                     graphItems.push(node);
+                } else {
+					hmLog("Discarding " + node["context_id"] + " (filtered out)");
                 }
-            } else {
-                hmLog("Enrolling " + node["context_id"] + " (no category)");
+            } else if (currentContextType == "---no-context") {
+                hmLog("Enrolling " + node["context_id"] + " (no context type)");
                 graphItems.push(node);
+            } else {
+                hmLog("Discarding " + node["context_id"] + " (no context type)");
             }
         }
     } else {
+		//No current content type... Enrolling all nodes
         graphItems = currentItems;
     }
 }
@@ -276,7 +280,8 @@ export default {
             type: String,
             default: null,
         },
-		contextProps: String
+		contextProps: String,
+		refresh: Function //VITAL!!!
 	},
     watch: {
 		items: {
@@ -315,11 +320,13 @@ export default {
 			displayGraph();
         },
 		filter: function(newVal, oldVal) {
-			//NOOP
+			//Refreshing after filter has changed
+			setTimeout(function() { refreshHandler(); }, 500);
         },
     },
     setup(props, context) {
 	    onMounted(() => {
+			refreshHandler = props.refresh;
 			collection = props.collection;
 			console.log("Mounted: " + props.collection);
 			contextProps = parseCProps(props.contextProps);
