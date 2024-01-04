@@ -3,36 +3,55 @@
 		<div v-if="!loading">
 	        <div id="div-graph"></div>
 	    </div>
-		<!--
-	    <div id="info"></div>
-		-->
+		<div id="info">
+			<table>
+				<tr>
+					<td id="us-link-td">pippo</td>
+					<td id="us-desc-td">pluto pluto pluto pluto pluto pluto pluto pluto pluto pluto pluto pluto pluto pluto pluto pluto pluto pluto pluto pluto pluto pluto pluto pluto pluto pluto pluto pluto pluto pluto pluto pluto pluto pluto </td>
+				</tr>
+			</table>
+		</div>
 	</div>
 </template>
 
-<style lang="css" scoped>
+<style lang="css">
+	#div-graph svg { 
+		width: 100% !important;
+		height: 100% !important;
+		border: dashed 2pt var(--background-normal);
+	}
+</style>
 
+<style lang="css" scoped>
 	.layout-harris-matrix {
-		display: contents;
-		margin: var(--content-padding);
-		margin-bottom: var(--content-padding-bottom);
+		position: relative;
+		width: 90%;
+		height: calc(100% - 120px);
 	}
 
     #div-graph { 
-		/*border: solid 1pt black; 
-		border-radius: 15px; 
-		margin-left: 10%; 
-		margin-top: 5%;*/
-		
-		min-width: calc(100% - var(--content-padding)) !important;
-		min-height: calc(100% - var(--content-padding-bottom)) !important;
+		width: calc(100% - var(--content-padding)) !important;
 		margin-left: var(--content-padding);
+		height: calc(70vh - 120px);
+	}
+    
+	#info { 
+		width: calc(100% - var(--content-padding)) !important;
+		margin-left: var(--content-padding);
+		margin-top: 30px;
+		border-top: solid 3pt var(--background-normal);
 	}
 	
-	
-	#div-graph svg { width: 98% !important; height: 98% !important; }
-    #category-sel { margin-left: 10%; margin-top: 20px; }
-    #info { margin-left: 10%; margin-top: 20px; }
-    #info a { margin-left: 10%; text-decoration: underline; }
+	#info table { width: 100%; margin-top: 10px; }
+	#info table td { vertical-align: top; }
+	#us-link-td { 
+		width: 15%;
+		text-align: right;
+		font-weight: bolder;
+		text-decoration: underline;
+		font-size: 1.8em;
+		padding-right: 15px;
+	}
 </style>
 
 <script>
@@ -61,7 +80,7 @@ function displayNodeInfos(node) {
     let nid = node.querySelector('title').textContent;
     let attrs = nodesAttributes[nid];
     let tgt = "https://archeodirect.info/admin/content/contexts/" + attrs.id + "\"";
-    document.getElementById('info').innerHTML = "<a href=\"" + tgt + "\" target=\"_blank\" style=\"font-weight: bolder; cursor: pointer;\">US " + nid + "</a>: " + attrs.text;
+    //document.getElementById('info').innerHTML = "<a href=\"" + tgt + "\" target=\"_blank\" style=\"font-weight: bolder; cursor: pointer;\">US " + nid + "</a>: " + attrs.text;
 }
 
 function addZoomPan() {
