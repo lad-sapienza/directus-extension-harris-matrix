@@ -201,8 +201,14 @@ function prepareGraph() {
 						relation = "\"" + node["context_id"] + "\" -> \"" + otherContextId + "\";";
 					} else if (['is filled by', 'is covered by', 'is cut by'].indexOf(child["relationship"]) != -1) {
 						relation = "\"" + otherContextId + "\" -> \"" + node["context_id"] + "\";";
+					} else if (child["relationship"] == "carries") {
+						relation = "\"" + otherContextId + "\" -> \"" + node["context_id"] + "\" [style=\"dashed\", color=\"green\", dir=\"none\"];";
+					} else if (child["relationship"] == "is the same as") {
+						relation = "\"" + otherContextId + "\" -> \"" + node["context_id"] + "\" [style=\"dashed\", color=\"blue\", dir=\"none\"];";
+					} else if (child["relationship"] == "is bound to") {
+						relation = "\"" + otherContextId + "\" -> \"" + node["context_id"] + "\" [style=\"dashed\", color=\"blue\", dir=\"none\"];";
 					} else {
-						hmLog("Correlation: to be done");
+						hmLog("Not managed: " + child["relationship"]);
 					}
 				}
 				
