@@ -46,13 +46,12 @@ export default {
 		const contextTypes = computed(() => {
 			var itz = [{"text": "Any", "value": null}]
 			var itzf = [];
-			console.log("Itimzz");
+			// TODO: Apply array mapping for a better readability
 			for (var ic in items.value) {
 				let item = items.value[ic];
 				if (item.context_type) {
 					if (itzf.indexOf(item.context_type) != -1) continue;
 					let it = {"text": item.context_type, "value": item.context_type};
-					console.log(it);
 					itzf.push(item.context_type);
 					itz.push(it);
 				}
@@ -60,12 +59,10 @@ export default {
 			return itz;
 		});
 		
-//			:item-title="title"
-//			:item-value="value"
-
 		const spline = 'Ortho';
         const concentrated = false;
         const contextType = null;
+		const consoleLogging = false;
 		
 		return { 
             name,
@@ -83,17 +80,13 @@ export default {
 			selection,
 			getItems,
 			refresh,
-			contextTypes
+			contextTypes,
+			consoleLogging
         };
 		
-		function refresh() {
+		function refresh() { //UNUSED?
 			getItems();
 		}
 		
 	},
 };
-
-
-//check app/src/layouts/tabular/
-
-
