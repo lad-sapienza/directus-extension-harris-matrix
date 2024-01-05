@@ -55,7 +55,7 @@ const contextPropsWritable = useSync(props, 'contextProps', emit);
 				},
                 {
 					text: 'Ortho',
-					value: 'compact',
+					value: 'ortho',
 				},
                 {
 					text: 'Spline',
