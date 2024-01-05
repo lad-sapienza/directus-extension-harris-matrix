@@ -81,7 +81,7 @@ function displayNodeInfos(node) {
     hmLog("[NODE INFO: " + node + "]");
     let nid = node.querySelector('title').textContent;
     let attrs = nodesAttributes[nid];
-    document.getElementById('us-link-aspan').innerHTML = `<a href="./content/${collection}/${attrs.id}" target="_blank" style="cursor: pointer;">US ${nid}</a>`;
+    document.getElementById('us-link-aspan').innerHTML = `<a href="./content/${collection}/${attrs.id}" target="_blank" style="cursor: pointer;">${nid}</a>`;
 	var cType = attrs.context_type == null ? "-" : attrs.context_type;
 	document.getElementById('us-link-cspan').innerHTML = `(<i>${cType}</i>)`;
 	document.getElementById('us-desc-dspan').innerHTML = `${attrs.text}`;
