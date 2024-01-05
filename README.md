@@ -1,6 +1,6 @@
 # directus-extension-harris-matrix
 
-`directus-extension-harris-matrix` is an [Directus](https://directus.io/) [Layout extenstion](https://docs.directus.io/extensions/layouts.html) that brings graph visualisation of stratigraphy data in your database.
+`directus-extension-harris-matrix` is a [Directus](https://directus.io/) [layout extension](https://docs.directus.io/extensions/layouts.html) that brings graph visualisation of stratigraphy data to your archaeological database.
 
 The [Harris matrix](https://en.wikipedia.org/wiki/Harris_matrix) is a tool used to depict the temporal succession of archaeological contexts and thus the sequence of depositions and surfaces on a 'dry land' archaeological site, otherwise called a 'stratigraphic sequence'. The matrix reflects the relative position and stratigraphic contacts of observable stratigraphic units, or contexts. It was developed in 1973 in Winchester, England, by Edward C. Harris. 
 
