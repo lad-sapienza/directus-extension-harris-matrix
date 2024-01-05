@@ -114,7 +114,7 @@ function displayGraph() {
     while (item.firstChild) {
       item.removeChild(item.firstChild)
     }
-    let digraph = "digraph {splines=" + currentSplines + "; concentrated=" + currentConcentrated + "; " + currentGraph + " }";
+    let digraph = `digraph { splines=${currentSplines}; concentrated=${currentConcentrated}; ${currentGraph} }`;
     hmLog("DIGRAPH V2:\n" + digraph);
     let svg = viz.renderSVGElement(digraph);
     item.appendChild(svg);
@@ -177,14 +177,14 @@ function prepareGraph() {
     for (var eidx in items) {
         let node = items[eidx];
         var nodeText = node.description;
-        var nodeProps = ["shape=\"box\""];
+        var nodeProps = [`shape="box"`];
 		
 		if(node.context_type && contextProps[node.context_type] != null) {
 			hmLog("Adding " + contextProps[node.context_type] + " as node props");
 			nodeProps = contextProps[node.context_type];
 		}
         
-		nodes.push("\"" + node["context_id"] + "\" [" + nodeProps.join(",") + "];");
+		nodes.push(`"${node["context_id"]}" [${nodeProps.join(",")}];`);
         nodesAttributes[node["context_id"]] = {"id": node.id, "text": nodeText, "context_type": node.context_type}; //Could not figure out how to access images
 
         if (node["stratigraphy"]) {
@@ -197,22 +197,20 @@ function prepareGraph() {
 				if (validTargets[otherContextId] == null) continue;
 				
 				if (child["relationship"]) {
-					if (['fills', 'covers', 'cuts'].indexOf(child["relationship"]) != -1) {
-						relation = "\"" + node["context_id"] + "\" -> \"" + otherContextId + "\";";
-					} else if (['is filled by', 'is covered by', 'is cut by'].indexOf(child["relationship"]) != -1) {
-						relation = "\"" + otherContextId + "\" -> \"" + node["context_id"] + "\";";
-					} else if (child["relationship"] == "carries") {
-						relation = "\"" + otherContextId + "\" -> \"" + node["context_id"] + "\" [style=\"dashed\", color=\"green\", dir=\"none\"];";
-					} else if (child["relationship"] == "is the same as") {
-						relation = "\"" + otherContextId + "\" -> \"" + node["context_id"] + "\" [style=\"dashed\", color=\"blue\", dir=\"none\"];";
-					} else if (child["relationship"] == "is bound to") {
-						relation = "\"" + otherContextId + "\" -> \"" + node["context_id"] + "\" [style=\"dotted\", color=\"blue\", dir=\"none\"];";
+					if (['fills', 'covers', 'cuts', 'leans against'].includes(child["relationship"])) {
+						relation = `"${node["context_id"]}" -> "${otherContextId}";`;
+					} else if (['is filled by', 'is covered by', 'is cut by', 'carries'].includes(child["relationship"])) {
+						relation = `"${otherContextId}" -> "${node["context_id"]}";`;
+                    } else if (['is the same as', 'is bound to'].includes(child["relationship"])) {
+                        relation = `"${otherContextId}" -> "${node["context_id"]}" [style="dashed", color="blue", dir="none"];`;
 					} else {
-						hmLog("Not managed: " + child["relationship"]);
+						hmLog(`Not managed: ${child["relationship"]}`);
 					}
 				}
 				
-				if (arcs.indexOf(relation) == -1) arcs.push(relation);
+				if (!arcs.includes(relation)) {
+                    arcs.push(relation);
+                }
             }
         }
     }
