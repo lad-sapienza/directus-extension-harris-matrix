@@ -60,9 +60,13 @@ export default {
 		});
 		
 		
-		const contextProps = "layer$shape=box;style=filled;fillcolor=#ebebeb;tooltip=Layer\n\n" +
-							 "cut$shape=box;style=filled;color=red;fillcolor=white;tooltip=Cut\n\n" +
-							 "structure$shape=box;tooltip=Structure";
+		const contextProps = `layer$shape=ellipse;tooltip=Layer
+
+cut$shape=invtrapezium;style=filled;color=red;fillcolor=white;tooltip=Cut
+		
+structure$shape=box;style=filled;fillcolor=#ebebeb;tooltip=Structure`;
+		
+		
 							 
 		const spline = 'Ortho';
         const concentrated = false;
