@@ -1,14 +1,38 @@
 {
-    "name": "directus-extension-directus-layout-example",
+    "name": "directus-extension-harris-matrix",
     "description": "Please enter a description for your extension",
+    "homepage": "https://github.com/lab-archeologia-digitale/directus-extension-harris-matrix",
+    "bugs": {
+        "url": "https://github.com/lab-archeologia-digitale/directus-extension-harris-matrix/issues"
+    },
     "icon": "extension",
-    "version": "1.0.0",
+    "version": "0.0.1",
     "keywords": [
         "directus",
         "directus-extension",
-        "directus-custom-layout"
+        "directus-custom-layout",
+        "archaeology",
+        "archaeologic-stratigraphy",
+        "harris-matrix",
+        "graph-layout"
     ],
     "type": "module",
+    "license": "AGPL-3.0",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/lab-archeologia-digitale/directus-extension-harris-matrix.git"
+    },
+    "author": {
+        "name": "Domenico Santoro",
+        "url": "https://github.com/domesantoro"
+    },
+    "contributors": [
+        {
+            "name": "Julian Bogdani",
+            "email": "julian.bogdani@uniroma1.it",
+            "url": "https://github.com/jbogdani"
+        }
+    ],
     "directus:extension": {
         "type": "layout",
         "path": "dist/index.js",
