@@ -6,7 +6,10 @@
 		<div id="info">
 			<table>
 				<tr>
-					<td id="us-link-td"><span id="us-link-aspan"></span><br><span id="us-link-cspan"></span></td>
+					<td id="us-link-td" rowspan="2"><span id="us-link-aspan"></span><br><span id="us-link-cspan"></span></td>
+					<td id="inflo-close-td"><span id="info-close">close</span></td>
+				</tr>
+				<tr id="us-desc-desc-tr">
 					<td id="us-desc-td"><span id="us-desc-dspan"></span></td>
 				</tr>
 			</table>
@@ -32,23 +35,47 @@
     #div-graph { 
 		width: calc(100% - var(--content-padding)) !important;
 		margin-left: var(--content-padding);
-		height: calc(70vh - 120px);
+		height: calc(100vh - 120px);
 	}
     
-	#info { 
-		width: calc(100% - var(--content-padding)) !important;
-		margin-left: var(--content-padding);
+	#info {
+		display: none;
+	    margin-left: var(--content-padding);
 		margin-top: 30px;
-		border-top: solid 3pt var(--background-normal);
+		
+		float: left;
+		background-color: white;
+		border: solid 1pt gray;
+		width: 70% !important;
+		position: relative;
+		left: 15%;
+		top: -70%;
+		height: 40%;
 	}
 	
-	#info table { width: 100%; margin-top: 10px; }
+	#info table { width: 100%; height: 100%; }
 	#info table td { vertical-align: top; }
-	#us-link-td { width: 15%; text-align: right; padding-right: 15px; }
+	#us-link-td { 
+		width: 15%; 
+		text-align: center; 
+		padding-top: 10px;
+		border-right: dotted 2pt gray;
+	}
+	#inflo-close-td {
+		text-align: right;
+		border-bottom: dotted 2pt gray;
+	}
+	#info-close {
+		margin: 10px;
+		cursor: pointer;
+	}
 	#us-link-aspan { 
 		font-weight: bolder;
 		text-decoration: underline;
 		font-size: 1.8em;
+	}
+	#us-desc-desc-tr {
+		height: 90%;
 	}
 </style>
 
@@ -76,6 +103,45 @@ var consoleLogging = false;
 var contextProps = {};
 
 var refreshHandler = null;
+var queryFieldsChangeHandler = null;
+
+// FIELDS
+var contextId_field = "";
+var contextLabel_field = "";
+var contentDescription_field = "";
+var contextType_field = "";
+
+var pk_field = "";
+
+function resetInfo() {
+    if (document.getElementById('us-link-aspan')) document.getElementById('us-link-aspan').innerHTML = "";
+    if (document.getElementById('us-link-cspan')) document.getElementById('us-link-cspan').innerHTML = "";
+    if (document.getElementById('us-desc-dspan')) document.getElementById('us-desc-dspan').innerHTML = "";
+}
+
+function closeInfo() {
+	resetInfo();
+	let svg = document.querySelector("#div-graph").querySelector('svg');
+	if(svg) svg.style.opacity = 1;
+	if (document.getElementById('info')) document.getElementById('info').style.display = "none";
+}
+
+function mapItems(items) {
+	var mapped = []
+	for (var ix in items) {
+		let item = items[ix];
+		let nitem = {
+			"id": item[pk_field],
+			"context_id": item[contextId_field],
+			"label": item[contextLabel_field],
+			"description": item[contentDescription_field],
+			"context_type": item[contextType_field],
+			"stratigraphy": item["stratigraphy"]
+		}
+		mapped.push(nitem);
+	}
+	return mapped;
+}
 
 function displayNodeInfos(node) {
     hmLog("[NODE INFO: " + node + "]");
@@ -83,8 +149,11 @@ function displayNodeInfos(node) {
     let attrs = nodesAttributes[nid];
     document.getElementById('us-link-aspan').innerHTML = `<a href="./content/${collection}/${attrs.id}" target="_blank" style="cursor: pointer;">${nid}</a>`;
 	var cType = attrs.context_type == null ? "-" : attrs.context_type;
-	document.getElementById('us-link-cspan').innerHTML = `(<i>${cType}</i>)`;
+	document.getElementById('us-link-cspan').innerHTML = `${attrs.label} (<i>${cType}</i>)`;
 	document.getElementById('us-desc-dspan').innerHTML = `${attrs.text}`;
+	if (document.getElementById('info')) document.getElementById('info').style.display = "block";
+	let svg = document.querySelector("#div-graph").querySelector('svg');
+	if(svg) svg.style.opacity = 0.3;
 }
 
 function addZoomPan() {
@@ -106,9 +175,7 @@ function addZoomPan() {
  
 
 function displayGraph() {
-  if (document.getElementById('us-link-aspan')) document.getElementById('us-link-aspan').innerHTML = "";
-  if (document.getElementById('us-link-cspan')) document.getElementById('us-link-cspan').innerHTML = "";
-  if (document.getElementById('us-desc-dspan')) document.getElementById('us-desc-dspan').innerHTML = "";
+  resetInfo();
   instance().then(function(viz) {
     const item = document.querySelector("#div-graph");
     while (item.firstChild) {
@@ -176,16 +243,19 @@ function prepareGraph() {
 
     for (var eidx in items) {
         let node = items[eidx];
-        var nodeText = node.description;
         var nodeProps = [`shape="box"`];
 		
 		if(node.context_type && contextProps[node.context_type] != null) {
 			hmLog("Adding " + contextProps[node.context_type] + " as node props");
 			nodeProps = contextProps[node.context_type];
 		}
-        
+		
+		if (contextId_field != contextLabel_field) {
+			let nl = node.label == null ? "-" : node.label;
+			nodeProps.push(`label="${nl}"`);
+		}
 		nodes.push(`"${node["context_id"]}" [${nodeProps.join(",")}];`);
-        nodesAttributes[node["context_id"]] = {"id": node.id, "text": nodeText, "context_type": node.context_type}; //Could not figure out how to access images
+        nodesAttributes[node["context_id"]] = {"id": node.id, "label": node.label, "text": node.description, "context_type": node.context_type}; //Could not figure out how to access images
 
         if (node["stratigraphy"]) {
             for (var cix in node["stratigraphy"]) {
@@ -285,6 +355,12 @@ export default {
             default: null,
         },
 		contextProps: String,
+		contextIdField: String, 
+		contextLabelField: String, 
+		contentDescriptionField: String, 
+		contextTypeField: String,
+		primaryKeyFieldKey: String, 
+		queryFieldsChanged: Function,
 		refresh: Function //VITAL!!!
 	},
     watch: {
@@ -292,7 +368,7 @@ export default {
 		  deep: true,
 		  immediate: true,
 		  handler: function(newVal, oldVal) {
-             currentItems = newVal;
+             currentItems = mapItems(newVal);
 			 filterOut(); //Filtering inline
              prepareGraph();
              displayGraph(); 
@@ -327,14 +403,45 @@ export default {
 			//Refreshing after filter has changed
 			setTimeout(function() { refreshHandler(); }, 500);
         },
+		contextIdField: function(newVal, oldVal) {
+			contextId_field = newVal;
+			queryFieldsChangeHandler(contextId_field, contextLabel_field, contentDescription_field, contextType_field);
+        },
+		contextLabelField: function(newVal, oldVal) {
+			contextLabel_field = newVal;
+			queryFieldsChangeHandler(contextId_field, contextLabel_field, contentDescription_field, contextType_field);
+        },
+		contentDescriptionField: function(newVal, oldVal) {
+			contentDescription_field = newVal;
+			queryFieldsChangeHandler(contextId_field, contextLabel_field, contentDescription_field, contextType_field);
+        },
+		contextTypeField: function(newVal, oldVal) {
+			contextType_field = newVal;
+			queryFieldsChangeHandler(contextId_field, contextLabel_field, contentDescription_field, contextType_field);
+        },
     },
     setup(props, context) {
 	    onMounted(() => {
 			refreshHandler = props.refresh;
+			queryFieldsChangeHandler = props.queryFieldsChanged;
 			collection = props.collection;
 			console.log("Mounted: " + props.collection);
 			contextProps = parseCProps(props.contextProps);
 			console.log("Contexts Props: " + JSON.stringify(contextProps));
+			
+			contextId_field = props.contextIdField;
+			contextLabel_field = props.contextLabelField;
+			contentDescription_field = props.contentDescriptionField;
+			contextType_field = props.contextTypeField;
+			pk_field = props.primaryKeyFieldKey;
+			
+			if (document.getElementById('info-close')) document.getElementById('info-close').addEventListener('click', function() {
+		        closeInfo();
+		    });
+			
+			if (document.getElementById('div-graph')) document.getElementById('div-graph').addEventListener('click', function() {
+		        closeInfo();
+		    });
 		});
     },
 };
