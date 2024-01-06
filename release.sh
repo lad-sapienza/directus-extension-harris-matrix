@@ -100,7 +100,7 @@ fi
 
 echo ""
 echo "Committing..."
-git commit -m "Versioning to $NEXT_VERSION"
+git commit -am "Versioning to $NEXT_VERSION"
 echo ""
 echo "Pushing to develop..."
 git push origin "$CURRENT_BRANCH"
