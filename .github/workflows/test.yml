@@ -3,7 +3,7 @@ name: Automation test
 on:
   push:
     branches:
-      - automations #-dont # Remove this line if your primary branch is "master"
+      - automations #-dont
 
 jobs:
   build:
