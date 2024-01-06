@@ -107,7 +107,8 @@ var consoleLogging = false;
 var contextProps = {};
 
 var refreshHandler = null;
-var queryFieldsChangeHandler = null;
+var optFieldsChangedHandler = null;
+
 
 // FIELDS
 var contextId_field = "";
@@ -365,7 +366,7 @@ export default {
 		contentDescriptionField: String, 
 		contextTypeField: String,
 		primaryKeyFieldKey: String, 
-		queryFieldsChanged: Function,
+		optFieldsChanged: Function,
 		refresh: Function //VITAL!!!
 	},
     watch: {
@@ -381,15 +382,18 @@ export default {
 		},
         spline: function(newVal, oldVal) {
             currentSplines = newVal;
+			optFieldsChangedHandler("spline", currentSplines, false);
             displayGraph();
         },
         concentrated: function(newVal, oldVal) {
             currentConcentrated = newVal;
+			optFieldsChangedHandler("concentrated", currentConcentrated, false);
             displayGraph();
         },
         contextType: function(newVal, oldVal) {
 			hmLog("Context type is now: " + newVal);
-            currentContextType = newVal;
+			currentContextType = newVal;
+			optFieldsChangedHandler("contextType", currentContextType, false);
             filterOut(); //Filtering inline
             prepareGraph();
             displayGraph();
@@ -397,9 +401,11 @@ export default {
         consoleLogging: function(newVal, oldVal) {
 			console.log("Console log: " + (newVal == true ? "ON" : "OFF"));
             consoleLogging = newVal;
+			optFieldsChangedHandler("consoleLogging", consoleLogging, false);
         },
 		contextProps: function(newVal, oldVal) {
 			hmLog("Redoing context props");
+			optFieldsChangedHandler("contextProps", newVal, false);
 			contextProps = parseCProps(newVal);
 			prepareGraph();
 			displayGraph();
@@ -410,25 +416,25 @@ export default {
         },
 		contextIdField: function(newVal, oldVal) {
 			contextId_field = newVal;
-			queryFieldsChangeHandler(contextId_field, contextLabel_field, contentDescription_field, contextType_field);
+			optFieldsChangedHandler("contextIdField", contextId_field, true);
         },
 		contextLabelField: function(newVal, oldVal) {
 			contextLabel_field = newVal;
-			queryFieldsChangeHandler(contextId_field, contextLabel_field, contentDescription_field, contextType_field);
+			optFieldsChangedHandler("contextLabelField", contextLabel_field, true);
         },
 		contentDescriptionField: function(newVal, oldVal) {
 			contentDescription_field = newVal;
-			queryFieldsChangeHandler(contextId_field, contextLabel_field, contentDescription_field, contextType_field);
+			optFieldsChangedHandler("contentDescriptionField", contentDescription_field, true);
         },
 		contextTypeField: function(newVal, oldVal) {
 			contextType_field = newVal;
-			queryFieldsChangeHandler(contextId_field, contextLabel_field, contentDescription_field, contextType_field);
+			optFieldsChangedHandler("contextTypeField", contextType_field, true);
         },
     },
     setup(props, context) {
 	    onMounted(() => {
 			refreshHandler = props.refresh;
-			queryFieldsChangeHandler = props.queryFieldsChanged;
+			optFieldsChangedHandler = props.optFieldsChanged;
 			collection = props.collection;
 			console.log("Mounted: " + props.collection);
 			contextProps = parseCProps(props.contextProps);
@@ -447,6 +453,12 @@ export default {
 			if (document.getElementById('div-graph')) document.getElementById('div-graph').addEventListener('click', function() {
 		        closeInfo();
 		    });
+			
+			// PERSISTENCE
+			currentSplines = props.spline;
+			currentConcentrated = props.currentConcentrated;
+			consoleLogging = props.consoleLogging;
+			currentContextType = props.contextType;
 		});
     },
 };
