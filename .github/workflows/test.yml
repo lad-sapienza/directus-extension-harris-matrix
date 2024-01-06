@@ -43,11 +43,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
         with:
           #steps.ghpages.outputs.content
-          tag_name: v0.0.1-release-tests.2 #${{ github.ref }}
-          release_name: Release v0.0.1-release-tests.2 #${{ github.ref }}
+          tag_name: ${{ steps.split.outputs._0 }}
+          release_name: Release ${{ steps.split.outputs._0 }}
           body: |
-            Changes in this Release
-            - First Change
-            - Second Change
+            Changes in this Release${{ steps.split.outputs._1 }}
           draft: false
           prerelease: false
