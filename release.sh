@@ -56,7 +56,7 @@ fi
 
 echo "$NEXT_VERSION" > "$RELEASE_VER"
 
-echo "" > "$RELEASE_CHL"
+> "$RELEASE_CHL"
 CHANGE_LINES_LOG=""
 echo ""
 echo "Insert release changes (input blank to end)"
