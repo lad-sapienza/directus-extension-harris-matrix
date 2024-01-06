@@ -3,7 +3,7 @@ name: Automation test
 on:
   push:
     branches:
-      - automations #-dont
+      - main #-dont
 
 jobs:
   build:
