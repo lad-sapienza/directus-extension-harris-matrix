@@ -109,6 +109,11 @@ echo ""
 echo "Pushing to develop..."
 git push origin "$CURRENT_BRANCH"
 
+echo "Merging develop -> main..."
+git checkout main
+git merge develop
+git push
+
 echo ""
 echo "Done!"
 echo ""
