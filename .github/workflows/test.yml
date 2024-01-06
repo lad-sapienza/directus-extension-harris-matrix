@@ -3,7 +3,7 @@ name: Automation test
 on:
   push:
     branches:
-      - automations # Remove this line if your primary branch is "master"
+      - automations-dont # Remove this line if your primary branch is "master"
 
 jobs:
   build:
@@ -18,10 +18,11 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: '21.x'
-      - name: npm install and build
-        run: |
-          npm install
-          npm run build
+#  NOT NEEDED BY NOW
+#      - name: npm install and build
+#        run: |
+#          npm install
+#          npm run build
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
@@ -36,24 +37,3 @@ jobs:
             - Second Change
           draft: false
           prerelease: false
-          
-          
-#      MUST BECOME PUBLISHING - building and UPLOADING IS USELESS
-#      - name: Checkout repository
-#        uses: actions/checkout@v4
-#      - name: Use Node.js
-#        uses: actions/setup-node@v3
-#        with:
-#          node-version: '21.x'
-#      - name: npm install, build, and test
-#        run: |
-#          npm install
-#          npm run build --if-present
-#          npm test
-#      - name: Archive production artifacts
-#        uses: actions/upload-artifact@v3
-#        with:
-#          name: dist-without-markdown
-#          path: |
-#            dist
-#            !dist/**/*.md
