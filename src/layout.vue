@@ -108,6 +108,8 @@ var contextType_field = "";
 
 var pk_field = "";
 
+let toogleInfo = false;
+
 function resetInfo() {
 	if (document.getElementById('context_id')) document.getElementById('context_id').innerHTML = "";
 	if (document.getElementById('context_type')) document.getElementById('context_type').innerHTML = "";
@@ -118,7 +120,7 @@ function closeInfo() {
 	resetInfo();
 	let svg = document.querySelector("#div-graph").querySelector('svg');
 	if (svg) svg.style.opacity = 1;
-	document.getElementById('info') && document.getElementById('info').style.display === 'block' ? document.getElementById('info').style.display = "none" : '';
+	if (document.getElementById('info')) document.getElementById('info').style.display = "none";
 }
 
 function mapItems(items) {
@@ -149,9 +151,10 @@ function displayNodeInfos(node) {
 	document.getElementById('context_type').innerHTML = `${attrs.context_type}`;
 	document.getElementById('context_description').innerHTML = `${attrs.text}`;
 
-	if (document.getElementById('info')) document.getElementById('info').style.display = "block";
 	let svg = document.querySelector("#div-graph").querySelector('svg');
 	if (svg) svg.style.opacity = 0.3;
+	if (document.getElementById('info')) document.getElementById('info').style.display = "block";
+
 }
 
 function addZoomPan() {
@@ -437,9 +440,9 @@ export default {
 				closeInfo();
 			});
 
-			if (document.getElementById('div-graph')) document.getElementById('div-graph').addEventListener('click', function () {
-				closeInfo();
-			});
+			// if (document.getElementById('div-graph')) document.getElementById('div-graph').addEventListener('click', function () {
+			// 	closeInfo();
+			// });
 		});
 	},
 };

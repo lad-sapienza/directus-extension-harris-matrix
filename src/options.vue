@@ -8,13 +8,13 @@ interface Props {
 	spline: 'none' | 'line' | 'polyline' | 'curved' | 'ortho' | 'spline';
 	concentrated: true | false;
 	contextType: string;
-	contextTypes: Array;
+	contextTypes: Array<String>;
 	consoleLogging: true | false;
 	contextProps: string;
-	keyFields: Array;
-	labellingFields: Array;
-	contextTypeFields: Array;
-	descriptionFields: Array;
+	keyFields: Array<String>;
+	labellingFields: Array<String>;
+	contextTypeFields: Array<String>;
+	descriptionFields: Array<String>;
 	contextIdField: string;
 	contextLabelField: string;
 	contentDescriptionField: string;
