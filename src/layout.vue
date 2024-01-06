@@ -4,15 +4,16 @@
 	        <div id="div-graph"></div>
 	    </div>
 		<div id="info">
-			<table>
-				<tr>
-					<td id="us-link-td" rowspan="2"><span id="us-link-aspan"></span><br><span id="us-link-cspan"></span></td>
-					<td id="inflo-close-td"><span id="info-close">close</span></td>
-				</tr>
-				<tr id="us-desc-desc-tr">
-					<td id="us-desc-td"><span id="us-desc-dspan"></span></td>
-				</tr>
-			</table>
+			<h2>
+				<span id="context_id" class="type-title"></span> 
+				&nbsp;
+				<span id="context_type"></span>
+			</h2>
+			<div id="context_description"></div>
+			<div id="action_container">
+				<div id="view_record"></div>
+				<div><span id="info-close">Close</span></div>
+			</div>
 		</div>
 	</div>
 </template>
@@ -21,7 +22,7 @@
 	#div-graph svg { 
 		width: 100% !important;
 		height: 100% !important;
-		border: dashed 2pt var(--background-normal);
+		border: dashed 1px var(--background-normal-alt);
 
 		g.node {
 			cursor: pointer;
@@ -36,7 +37,7 @@
 		height: calc(100% - 120px);
 	}
 
-    #div-graph { 
+	#div-graph { 
 		width: calc(100% - var(--content-padding)) !important;
 		margin-left: var(--content-padding);
 		height: calc(100vh - 120px);
@@ -48,38 +49,28 @@
 		margin-top: 30px;
 		
 		float: left;
-		background-color: white;
-		border: solid 1pt gray;
+		background-color: var(--background-highlight);
+		border: solid 1pt  var(--background-normal-alt);
 		width: 70% !important;
 		position: relative;
 		left: 15%;
 		top: -70%;
-		height: 40%;
+		max-height: 500px;
+
+		padding: 2rem;
+	}
+
+	#action_container{
+		display:flex;
+		justify-content:space-between;
+		margin-top:1rem; 
+		padding-top:1rem; 
+		border-top: 1px solid var(--background-normal-alt);
 	}
 	
-	#info table { width: 100%; height: 100%; }
-	#info table td { vertical-align: top; }
-	#us-link-td { 
-		width: 15%; 
-		text-align: center; 
-		padding-top: 10px;
-		border-right: dotted 2pt gray;
-	}
-	#inflo-close-td {
-		text-align: right;
-		border-bottom: dotted 2pt gray;
-	}
 	#info-close {
 		margin: 10px;
 		cursor: pointer;
-	}
-	#us-link-aspan { 
-		font-weight: bolder;
-		text-decoration: underline;
-		font-size: 1.8em;
-	}
-	#us-desc-desc-tr {
-		height: 90%;
 	}
 </style>
 
@@ -118,16 +109,16 @@ var contextType_field = "";
 var pk_field = "";
 
 function resetInfo() {
-    if (document.getElementById('us-link-aspan')) document.getElementById('us-link-aspan').innerHTML = "";
-    if (document.getElementById('us-link-cspan')) document.getElementById('us-link-cspan').innerHTML = "";
-    if (document.getElementById('us-desc-dspan')) document.getElementById('us-desc-dspan').innerHTML = "";
+    if (document.getElementById('context_id')) document.getElementById('context_id').innerHTML = "";
+    if (document.getElementById('context_type')) document.getElementById('context_type').innerHTML = "";
+    if (document.getElementById('context_description')) document.getElementById('context_description').innerHTML = "";
 }
 
 function closeInfo() {
 	resetInfo();
 	let svg = document.querySelector("#div-graph").querySelector('svg');
 	if(svg) svg.style.opacity = 1;
-	if (document.getElementById('info')) document.getElementById('info').style.display = "none";
+	document.getElementById('info') && document.getElementById('info').style.display === 'block' ? document.getElementById('info').style.display = "none" : '';
 }
 
 function mapItems(items) {
@@ -151,10 +142,12 @@ function displayNodeInfos(node) {
 	hmLog("[NODE INFO: " + node + "]");
 	let nid = node.querySelector('title').textContent;
 	let attrs = nodesAttributes[nid];
-	document.getElementById('us-link-aspan').innerHTML = `<a href="./content/${collection}/${attrs.id}" style="cursor: pointer;">${nid}</a>`;
-	var cType = attrs.context_type == null ? "-" : attrs.context_type;
-	document.getElementById('us-link-cspan').innerHTML = `${attrs.label} (<i>${cType}</i>)`;
-	document.getElementById('us-desc-dspan').innerHTML = `${attrs.text}`;
+
+	document.getElementById('view_record').innerHTML = `<a href="./content/${collection}/${attrs.id}" style="cursor: pointer;">View record</a>`;
+	
+	document.getElementById('context_id').innerHTML = `${attrs.label}`;
+	document.getElementById('context_type').innerHTML = `${attrs.context_type}`;
+	document.getElementById('context_description').innerHTML = `${attrs.text}`;
 
 	if (document.getElementById('info')) document.getElementById('info').style.display = "block";
 	let svg = document.querySelector("#div-graph").querySelector('svg');
