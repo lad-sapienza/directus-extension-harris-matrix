@@ -113,6 +113,7 @@ echo "Merging develop -> main..."
 git checkout main
 git merge develop
 git push
+git checkout develop
 
 echo ""
 echo "Done!"
