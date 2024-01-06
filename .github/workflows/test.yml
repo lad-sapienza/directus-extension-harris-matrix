@@ -34,7 +34,7 @@ jobs:
         id: split
         with:
           msg: "${{ steps.version-infos.outputs.content }}"
-          separator: "CHANGELOG"
+          separator: "-CHANGELOG-"
 
       - name: Create Release
         id: create_release
