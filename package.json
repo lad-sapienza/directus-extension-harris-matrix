@@ -40,7 +40,8 @@
         "host": "^10.1.11"
     },
     "scripts": {
-        "build": "directus-extension build --no-minify",
+        "build": "directus-extension build",
+        "buildnm": "directus-extension build --no-minify",
         "dev": "directus-extension build -w --no-minify",
         "link": "directus-extension link"
     },
