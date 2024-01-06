@@ -71,10 +71,10 @@ export default {
 		const { collection, filter, search } = toRefs(props);
 		
 		// QUERY FIELDS - DEFAULTED!
-		var contextIdField = getSessionQueryField("contextIdField", "context_id");
-		var contextLabelField = getSessionQueryField("contextLabelField", "context_id");
-		var contentDescriptionField = getSessionQueryField("contentDescriptionField", "description");
-		var contextTypeField = getSessionQueryField("contextTypeField", "context_type");
+		var contextIdField = getSessionOptField("contextIdField", "context_id");
+		var contextLabelField = getSessionOptField("contextLabelField", "context_id");
+		var contentDescriptionField = getSessionOptField("contentDescriptionField", "description");
+		var contextTypeField = getSessionOptField("contextTypeField", "context_type");
 		
 		const queryFields = computed(() => {
 			var fields = [];
@@ -126,18 +126,19 @@ export default {
 		});
 		
 		
-		const contextProps = `layer$shape=ellipse;tooltip=Layer
+		const contextPropsDefault = `layer$shape=ellipse;tooltip=Layer
 
 cut$shape=invtrapezium;style=filled;color=red;fillcolor=white;tooltip=Cut
 		
 structure$shape=box;style=filled;fillcolor=#ebebeb;tooltip=Structure`;
 		
+		const contextProps = getSessionOptField("contextProps", contextPropsDefault);
 		
 							 
-		const spline = 'Ortho';
-        const concentrated = false;
-        const contextType = null;
-		const consoleLogging = false;
+		const spline = getSessionOptField("spline", 'Ortho');
+        const concentrated = getSessionOptField("concentrated", false) == "true";
+        const contextType = getSessionOptField("contextType", null);
+		const consoleLogging = getSessionOptField("consoleLogging", false) == "true";
 		const primaryKeyFieldKey = primaryKeyField.value.field;
 		
 		return { 
@@ -157,7 +158,7 @@ structure$shape=box;style=filled;fillcolor=#ebebeb;tooltip=Structure`;
 			selection,
 			getItems,
 			refresh,
-			queryFieldsChanged,
+			optFieldsChanged,
 			contextTypes,
 			consoleLogging,
 			collection,
@@ -176,18 +177,23 @@ structure$shape=box;style=filled;fillcolor=#ebebeb;tooltip=Structure`;
 			getItems();
 		}
 		
-		function getSessionQueryField(field, defaultValue) {
+		function getSessionOptField(field, defaultValue) {
 			let sv = sessionStorage.getItem(`${collection}_${field}_store`);
 			if (sv) return sv;
 			return defaultValue;
 		}
 		
-		function queryFieldsChanged(contextIdField, contextLabelField, contentDescriptionField, contextTypeField) {
+		function optFieldsChanged(field, value, refreshItems) {
+			sessionStorage.setItem(`${collection}_${field}_store`, value);
+			if (refreshItems == true) refresh();
+		}
+		
+		/*function queryFieldsChanged(contextIdField, contextLabelField, contentDescriptionField, contextTypeField) {
 			sessionStorage.setItem(`${collection}_contextIdField_store`, contextIdField);
 			sessionStorage.setItem(`${collection}_contextLabelField_store`, contextLabelField);
 			sessionStorage.setItem(`${collection}_contentDescriptionField_store`, contentDescriptionField);
 			sessionStorage.setItem(`${collection}_contextTypeField_store`, contextTypeField);
 			getItems();
-		}
+		}*/
 	},
 };
