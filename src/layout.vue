@@ -22,6 +22,10 @@
 		width: 100% !important;
 		height: 100% !important;
 		border: dashed 2pt var(--background-normal);
+
+		g.node {
+			cursor: pointer;
+		}
 	}
 </style>
 
@@ -40,7 +44,7 @@
     
 	#info {
 		display: none;
-	    margin-left: var(--content-padding);
+	  margin-left: var(--content-padding);
 		margin-top: 30px;
 		
 		float: left;
@@ -144,13 +148,14 @@ function mapItems(items) {
 }
 
 function displayNodeInfos(node) {
-    hmLog("[NODE INFO: " + node + "]");
-    let nid = node.querySelector('title').textContent;
-    let attrs = nodesAttributes[nid];
-    document.getElementById('us-link-aspan').innerHTML = `<a href="./content/${collection}/${attrs.id}" target="_blank" style="cursor: pointer;">${nid}</a>`;
+	hmLog("[NODE INFO: " + node + "]");
+	let nid = node.querySelector('title').textContent;
+	let attrs = nodesAttributes[nid];
+	document.getElementById('us-link-aspan').innerHTML = `<a href="./content/${collection}/${attrs.id}" style="cursor: pointer;">${nid}</a>`;
 	var cType = attrs.context_type == null ? "-" : attrs.context_type;
 	document.getElementById('us-link-cspan').innerHTML = `${attrs.label} (<i>${cType}</i>)`;
 	document.getElementById('us-desc-dspan').innerHTML = `${attrs.text}`;
+
 	if (document.getElementById('info')) document.getElementById('info').style.display = "block";
 	let svg = document.querySelector("#div-graph").querySelector('svg');
 	if(svg) svg.style.opacity = 0.3;
