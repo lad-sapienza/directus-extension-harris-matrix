@@ -1,3 +1,5 @@
+RELEASE_VER="release.ver"
+RELEASE_CHL="release.cjl"
 echo "******************************************************"
 echo "****** DIRECTUS HARRIS MATRIX RELEASE PROCEDURE ******"
 echo "******************************************************"
@@ -33,7 +35,7 @@ else
     exit 1
 fi
 
-CURRENT_VERSION=$(head -n 1 "release.info")
+CURRENT_VERSION=$(<"$RELEASE_VER")
 NEXT_VERSION="$CURRENT_VERSION"
 
 if [[ "$RELEASE_MODE" != "J" ]]; then
@@ -52,10 +54,9 @@ if [[ "$RELEASE_MODE" != "J" ]]; then
     fi
 fi
 
-echo "$NEXT_VERSION" > "release.info"
-echo "-CHANGELOG-" >> "release.info"
+echo "$NEXT_VERSION" > "$RELEASE_VER"
 
-
+echo "" > "$RELEASE_CHL"
 CHANGE_LINES_LOG=""
 echo ""
 echo "Insert release changes (input blank to end)"
@@ -65,12 +66,12 @@ do
     if [[ "$CHANGE_LINE" == "" ]]; then
         break
     fi
-    echo "- $CHANGE_LINE" >> "release.info"
+    echo "- $CHANGE_LINE" >> "$RELEASE_CHL"
     echo "-----------------------------------------------------------------------------------------------------"
     CHANGE_LINES_LOG="$CHANGE_LINES_LOG\n* $CHANGE_LINE\n"
 done
 
-echo "Versioning date: $(date +"%H:%M")" >> "release.info"
+echo "Versioning time: $(date +"%H:%M")" >> "$RELEASE_CHL"
 
 
 echo ""
@@ -93,7 +94,8 @@ fi
 
 
 if [ "$CONTINUE_CMD" != "y" ] && [ "$CONTINUE_CMD" != "Y" ]; then
-    echo "$CURRENT_VERSION" > "release.info"
+    echo "$CURRENT_VERSION" > "$RELEASE_VER"
+    echo "" > "$RELEASE_CHL"
     echo ""
     echo "Ok, bye bye..."
     echo ""
