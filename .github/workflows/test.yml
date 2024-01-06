@@ -29,13 +29,14 @@ jobs:
         uses: jaywcjlove/github-action-read-file@main
         with:
           branch: main
-          path: release.info
-      - uses: winterjung/split@v2
-        id: split
+          path: release.ver
+      - name: Read version changelog
+        id: version-chl
+        uses: jaywcjlove/github-action-read-file@main
         with:
-          msg: "${{ steps.version-infos.outputs.content }}"
-          separator: "-CHANGELOG-"
-
+          branch: main
+          path: release.chl
+      
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
@@ -43,9 +44,10 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
         with:
           #steps.ghpages.outputs.content
-          tag_name: ${{ steps.split.outputs._0 }}
-          release_name: Release ${{ steps.split.outputs._0 }}
+          tag_name: ${{ steps.version-infos.outputs.content }}
+          release_name: Release ${{ steps.version-infos.outputs.content }}
           body: |
-            Changes in this Release${{ steps.split.outputs._1 }}
+            Changes in this Release
+            ${{ steps.version-chl.outputs.content }}
           draft: false
           prerelease: false
