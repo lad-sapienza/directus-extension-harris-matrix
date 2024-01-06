@@ -1,5 +1,5 @@
 RELEASE_VER="release.ver"
-RELEASE_CHL="release.cjl"
+RELEASE_CHL="release.chl"
 echo "******************************************************"
 echo "****** DIRECTUS HARRIS MATRIX RELEASE PROCEDURE ******"
 echo "******************************************************"
