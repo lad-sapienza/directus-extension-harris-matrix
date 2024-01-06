@@ -28,7 +28,7 @@ export default {
 			for (var lfvi in fieldsInCollection.value) {
 				let field = fieldsInCollection.value[lfvi];
 				if (["string", "uuid", "text"].includes(field.type)) {
-					fields.push({"text": `${field.field}`, "value": `${field.field}`});
+					fields.push({"text": `${field.name}`, "value": `${field.field}`});
 				}
 			}
 			return fields;
@@ -39,7 +39,7 @@ export default {
 			for (var lfvi in fieldsInCollection.value) {
 				let field = fieldsInCollection.value[lfvi];
 				if (["string", "uuid", "text"].includes(field.type)) {
-					fields.push({"text": `${field.field}`, "value": `${field.field}`});
+					fields.push({"text": `${field.name}`, "value": `${field.field}`});
 				}
 			}
 			return fields;
@@ -50,7 +50,7 @@ export default {
 			for (var lfvi in fieldsInCollection.value) {
 				let field = fieldsInCollection.value[lfvi];
 				if (["string", "text"].includes(field.type)) { //String-like by now
-					fields.push({"text": `${field.field}`, "value": `${field.field}`});
+					fields.push({"text": `${field.name}`, "value": `${field.field}`});
 				}
 			}
 			return fields;
@@ -61,7 +61,7 @@ export default {
 			for (var lfvi in fieldsInCollection.value) {
 				let field = fieldsInCollection.value[lfvi];
 				if (["string", "uuid", "text"].includes(field.type)) {
-					fields.push({"text": `${field.field}`, "value": `${field.field}`});
+					fields.push({"text": `${field.name}`, "value": `${field.field}`});
 				}
 			}
 			return fields;
