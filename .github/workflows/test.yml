@@ -33,7 +33,8 @@ jobs:
       - uses: winterjung/split@v2
         id: split
         with:
-          msg: '/release split v1.0.0'
+          msg: "${{ steps.version-infos.outputs.content }}"
+          separator: "CHANGELOG"
 
       - name: Create Release
         id: create_release
