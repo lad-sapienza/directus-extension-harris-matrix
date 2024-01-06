@@ -53,7 +53,7 @@ if [[ "$RELEASE_MODE" != "J" ]]; then
 fi
 
 echo "$NEXT_VERSION" > "release.info"
-echo "----------------" >> "release.info"
+echo "-CHANGELOG-" >> "release.info"
 
 
 CHANGE_LINES_LOG=""
@@ -65,10 +65,12 @@ do
     if [[ "$CHANGE_LINE" == "" ]]; then
         break
     fi
-    echo "$CHANGE_LINE" >> "release.info"
+    echo "- $CHANGE_LINE" >> "release.info"
     echo "-----------------------------------------------------------------------------------------------------"
     CHANGE_LINES_LOG="$CHANGE_LINES_LOG\n* $CHANGE_LINE\n"
 done
+
+echo "Versioning date: $(date +"%H:%M")" >> "release.info"
 
 
 echo ""
