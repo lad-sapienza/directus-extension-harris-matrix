@@ -30,7 +30,11 @@ jobs:
         with:
           branch: main
           path: release.info
-      
+      - uses: winterjung/split@v2
+        id: split
+        with:
+          msg: '/release split v1.0.0'
+
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
