@@ -18,8 +18,10 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: '21.x'
-      - name: npm build
-        run: npm run build
+      - name: npm install and build
+        run: |
+          npm install
+          npm run build
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
