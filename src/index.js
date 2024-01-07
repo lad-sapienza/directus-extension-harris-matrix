@@ -1,22 +1,22 @@
-import { ref, computed, watch } from 'vue';
-import { toRefs } from 'vue';
-import { useItems, useCollection, useSync } from '@directus/extensions-sdk';
-import LyoutOptions from './options.vue';
-import LayoutComponent from './layout.vue';
-import { LayoutOptions } from './types';
+import { ref, computed, watch } from "vue";
+import { toRefs } from "vue";
+import { useItems, useCollection, useSync } from "@directus/extensions-sdk";
+import LyoutOptions from "./options.vue";
+import LayoutComponent from "./layout.vue";
+import { LayoutOptions } from "./types";
 
 export default {
-	id: 'directus-harris-matrix-layout',
-	name: 'Harris Matrix',
-	icon: 'schema', //icon value from here -> https://fonts.google.com/icons
-	component: LayoutComponent,
-	slots: {
-		options: LyoutOptions,
-		sidebar: () => null,
-		actions: () => null,
-	},
-	setup(props, { emit }) {
-		const name = ref('Harris Matrix');
+  id: "directus-harris-matrix-layout",
+  name: "Harris Matrix",
+  icon: "schema", //icon value from here -> https://fonts.google.com/icons
+  component: LayoutComponent,
+  slots: {
+    options: LyoutOptions,
+    sidebar: () => null,
+    actions: () => null,
+  },
+  setup(props, { emit }) {
+    const name = ref("Harris Matrix");
 
 		const selection = useSync(props, 'selection', emit);
         // const layoutOptions = useSync(props, 'layoutOptions', emit);
@@ -190,7 +190,7 @@ structure$shape=box;style=filled;fillcolor=#ebebeb;tooltip=Structure`;
 		
 		/*function queryFieldsChanged(contextIdField, contextLabelField, contentDescriptionField, contextTypeField) {
 			sessionStorage.setItem(`${collection}_contextIdField_store`, contextIdField);
-			sessionStorage.setItem(`${collection}_contextLabelField_store`, contextLabelField);
+			sessionStorage.setItem(`${collection}_contextLabelField_store`, contextLabelField);			
 			sessionStorage.setItem(`${collection}_contentDescriptionField_store`, contentDescriptionField);
 			sessionStorage.setItem(`${collection}_contextTypeField_store`, contextTypeField);
 			getItems();
