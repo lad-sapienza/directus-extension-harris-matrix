@@ -75,7 +75,7 @@ export default {
 		var contextLabelField = getSessionOptField("contextLabelField", "context_id");
 		var contentDescriptionField = getSessionOptField("contentDescriptionField", "description");
 		var contextTypeField = getSessionOptField("contextTypeField", "context_type");
-		
+
 		const queryFields = computed(() => {
 			var fields = [];
 			for (var lfvi in fieldsInCollection.value) {
@@ -84,7 +84,7 @@ export default {
 				fields.push(field);
 			}
 			fields.push('stratigraphy.*.*');
-			console.log("Query fields: " + JSON.stringify(fields))
+			//console.log("Query fields: " + JSON.stringify(fields))
 			return fields;
 		});
 		
@@ -136,16 +136,18 @@ structure$shape=box;style=filled;fillcolor=#ebebeb;tooltip=Structure`;
 		
 							 
 		const spline = getSessionOptField("spline", 'Ortho');
-        const concentrated = getSessionOptField("concentrated", false) == "true";
-        const contextType = getSessionOptField("contextType", null);
+    const concentrated = getSessionOptField("concentrated", false) == "true";
+    const contextType = getSessionOptField("contextType", null);
 		const consoleLogging = getSessionOptField("consoleLogging", false) == "true";
 		const primaryKeyFieldKey = primaryKeyField.value.field;
+
+		const graphEngine = getSessionOptField("graphEngine", "standard");
 		
 		return { 
             name,
             info,
             primaryKeyField,
-			primaryKeyFieldKey,
+						primaryKeyFieldKey,
             items,
             loading,
             filter,
@@ -155,22 +157,23 @@ structure$shape=box;style=filled;fillcolor=#ebebeb;tooltip=Structure`;
             spline,
             concentrated,
             contextType,
-			selection,
-			getItems,
-			refresh,
-			optFieldsChanged,
-			contextTypes,
-			consoleLogging,
-			collection,
-			contextProps,
-			keyFields,
-			labellingFields,
-			contextTypeFields,
-			descriptionFields,
-			contextIdField, 
-			contextLabelField, 
-			contentDescriptionField, 
-			contextTypeField
+						selection,
+						getItems,
+						refresh,
+						optFieldsChanged,
+						contextTypes,
+						consoleLogging,
+						collection,
+						contextProps,
+						keyFields,
+						labellingFields,
+						contextTypeFields,
+						descriptionFields,
+						contextIdField, 
+						contextLabelField, 
+						contentDescriptionField, 
+						contextTypeField,
+						graphEngine
         };
 		
 		function refresh() {

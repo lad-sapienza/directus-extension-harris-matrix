@@ -19,11 +19,13 @@ interface Props {
 	contextLabelField: string;
 	contentDescriptionField: string;
 	contextTypeField: string;
+	graphEngine: 'standard' | 'carafa';
 }
 
 const props = defineProps<Props>();
 
-const emit = defineEmits(['update:spline',
+const emit = defineEmits([
+	'update:spline',
 	'update:activeFields',
 	'update:fields',
 	'update:concentrated',
@@ -33,7 +35,8 @@ const emit = defineEmits(['update:spline',
 	'update:contextIdField',
 	'update:contextLabelField',
 	'update:contentDescriptionField',
-	'update:contextTypeField'
+	'update:contextTypeField',
+	'update:graphEngine'
 ]);
 
 const splineWritable = useSync(props, 'spline', emit);
@@ -46,6 +49,9 @@ const contextIdFieldWritable = useSync(props, 'contextIdField', emit);
 const contextLabelFieldWritable = useSync(props, 'contextLabelField', emit);
 const contentDescriptionFieldWritable = useSync(props, 'contentDescriptionField', emit);
 const contextTypeFieldWritable = useSync(props, 'contextTypeField', emit);
+
+const graphEngineWritable = useSync(props, 'graphEngine', emit);
+
 </script>
 
 <template>
@@ -114,6 +120,19 @@ const contextTypeFieldWritable = useSync(props, 'contextTypeField', emit);
 	<div class="field">
 		<div class="type-label">Console logging</div>
 		<v-checkbox v-model="consoleLoggingWritable" label="Console logging" class="block"></v-checkbox>
+	</div>
+	<div class="field">
+		<div class="type-label">Engine</div>
+		<v-select v-model="graphEngineWritable" :items="[
+			{
+				text: 'Standard',
+				value: 'standard',
+			},
+			{
+				text: 'Carafa',
+				value: 'carafa',
+			},
+		]" />
 	</div>
 </template>
 

@@ -85,21 +85,23 @@ import { useApi, useStores } from '@directus/extensions-sdk';
 import svgPanZoom from "svg-pan-zoom";
 import { getCurrentInstance } from 'vue';
 
+import { setHmLogging,  hmLog } from './utils/hmlog.js';
+
+import * as StandardEngine from './engines/standard.js';
+import * as CarafaEngine from './engines/carafa.js';
+
 var collection = null;
 var currentItems = [];
 var graphItems = [];
-var validTargets = [];
 var currentGraph = null;
 var currentSplines = 'ortho';
 var currentConcentrated = false;
 var currentContextType = null;
 var nodesAttributes = {};
-var consoleLogging = false;
 var contextProps = {};
 
 var refreshHandler = null;
 var optFieldsChangedHandler = null;
-
 
 // FIELDS
 var contextId_field = "";
@@ -110,6 +112,35 @@ var contextType_field = "";
 var pk_field = "";
 
 let toogleInfo = false;
+
+
+var graphEngine = "standard";
+
+var prepareGraph = function() { console.log("******** ENGINE NOT SET *********"); }
+var engineVersion = "******** ENGINE NOT SET *********";
+
+function setEngine() {
+	if(graphEngine == "standard") {
+		prepareGraph = StandardEngine.prepareGraph;
+		engineVersion = StandardEngine.engineVersion;
+	} else if(graphEngine == "carafa") {
+		prepareGraph = CarafaEngine.prepareGraph;
+		engineVersion = CarafaEngine.engineVersion;
+	} else {
+		prepareGraph = function() { console.log("******** ENGINE NOT SET *********"); }
+		engineVersion = "******** ENGINE NOT SET *********";
+	}
+	hmLog("Engine set!");
+	hmLog(engineVersion);
+}
+
+function buildGraph() {
+	let graphElaboration = prepareGraph(graphItems, contextProps, mapValidTargets());
+	if(graphElaboration) {
+		currentGraph = graphElaboration.graph;
+		nodesAttributes = graphElaboration.attributes;
+	}
+}
 
 function resetInfo() {
 	if (document.getElementById('context_id')) document.getElementById('context_id').innerHTML = "";
@@ -135,6 +166,10 @@ function mapItems(items) {
 			"description": item[contentDescription_field],
 			"context_type": item[contextType_field],
 			"stratigraphy": item["stratigraphy"]
+		}
+		if(contextId_field != contextLabel_field) {
+			let nl = node.label == null ? "-" : node.label;
+			nitem["display_label"] = nl;
 		}
 		mapped.push(nitem);
 	}
@@ -177,6 +212,7 @@ function addZoomPan() {
 
 
 function displayGraph() {
+	
 	resetInfo();
 	instance().then(function (viz) {
 		const item = document.querySelector("#div-graph");
@@ -196,14 +232,34 @@ function displayGraph() {
 	setTimeout(addZoomPan, 750);
 }
 
-function setValidTargtes() {
+function mapValidTargets() {
 	//Loop effort to create a map
-	validTargets = graphItems.reduce((obj, item) => {
+	return graphItems.reduce((obj, item) => {
 		return {
 			...obj,
 			[item["context_id"]]: true,
 		};
 	}, {});
+}
+
+function parseCProps(cprops) {
+	hmLog("Parsing context props");
+	var dict = {};
+	let cps = cprops.split("\n");
+	for (var cpsi in cps) {
+		let cp = cps[cpsi].split("$");
+		if (cp.length != 2) continue;
+		dict[cp[0]] = [];
+		let propz = cp[1].split(";");
+		for (var propzi in propz) {
+			var cprop = propz[propzi].split("=");
+			if (cprop.length != 2) continue;
+			cprop = cprop[0] + "=\"" + cprop[1] + "\"";
+			hmLog("Adding '" + cprop + "' to " + cp[0]);
+			dict[cp[0]].push(cprop);
+		}
+	}
+	return dict;
 }
 
 //Better on nodes than on arcs (arcs should be O(N^2)) - Needed when filtering inline
@@ -231,90 +287,6 @@ function filterOut() {
 		//No current content type... Enrolling all nodes
 		graphItems = currentItems;
 	}
-}
-
-function prepareGraph() {
-	let items = graphItems;
-	setValidTargtes();
-
-	nodesAttributes = {};
-	hmLog('Vertex count: ' + items.length);
-
-	var nodes = [];
-	var arcs = [];
-
-	for (var eidx in items) {
-		let node = items[eidx];
-		var nodeProps = [`shape="box"`];
-
-		if (node.context_type && contextProps[node.context_type] != null) {
-			hmLog("Adding " + contextProps[node.context_type] + " as node props");
-			nodeProps = contextProps[node.context_type];
-		}
-
-		if (contextId_field != contextLabel_field) {
-			let nl = node.label == null ? "-" : node.label;
-			nodeProps.push(`label="${nl}"`);
-		}
-		nodes.push(`"${node["context_id"]}" [${nodeProps.join(",")}];`);
-		nodesAttributes[node["context_id"]] = { "id": node.id, "label": node.label, "text": node.description, "context_type": node.context_type }; //Could not figure out how to access images
-
-		if (node["stratigraphy"]) {
-			for (var cix in node["stratigraphy"]) {
-				let child = node["stratigraphy"][cix];
-				var relation = "";
-
-				if (child["other_context"] == null) continue;
-				let otherContextId = child["other_context"]["context_id"];
-				if (validTargets[otherContextId] == null) continue;
-
-				if (child["relationship"]) {
-					if (['fills', 'covers', 'cuts', 'leans against'].includes(child["relationship"])) {
-						relation = `"${node["context_id"]}" -> "${otherContextId}";`;
-					} else if (['is filled by', 'is covered by', 'is cut by', 'carries'].includes(child["relationship"])) {
-						relation = `"${otherContextId}" -> "${node["context_id"]}";`;
-					} else if (['is the same as', 'is bound to'].includes(child["relationship"])) {
-						relation = `"${otherContextId}" -> "${node["context_id"]}" [style="dashed", color="blue", dir="none"];`;
-					} else {
-						hmLog(`Not managed: ${child["relationship"]}`);
-					}
-				}
-
-				if (!arcs.includes(relation)) {
-					arcs.push(relation);
-				}
-			}
-		}
-	}
-
-	currentGraph = nodes.join("\n") + "\n" + arcs.join("\n");
-	//hmLog(currentGraph);
-}
-
-function hmLog(message) {
-	if (consoleLogging != true) return;
-	console.log("[HMLOG] - " + message);
-}
-
-function parseCProps(cprops) {
-	hmLog("Parsing context props");
-	var dict = {};
-	let cps = cprops.split("\n");
-	for (var cpsi in cps) {
-		let cp = cps[cpsi].split("$");
-		if (cp.length != 2) continue;
-		dict[cp[0]] = [];
-		let propz = cp[1].split(";");
-		for (var propzi in propz) {
-			var cprop = propz[propzi].split("=");
-			if (cprop.length != 2) continue;
-			cprop = cprop[0] + "=\"" + cprop[1] + "\"";
-			//hmLog("Adding '" + cprop + "' to " + cp[0]);
-			console.log("Adding '" + cprop + "' to " + cp[0]);
-			dict[cp[0]].push(cprop);
-		}
-	}
-	return dict;
 }
 
 
@@ -356,6 +328,10 @@ export default {
 			type: String,
 			default: null,
 		},
+		graphEngine: {
+			type: String,
+			default: "standard",
+		},
 		contextProps: String,
 		contextIdField: String,
 		contextLabelField: String,
@@ -371,8 +347,8 @@ export default {
 			immediate: true,
 			handler: function (newVal, oldVal) {
 				currentItems = mapItems(newVal);
-				filterOut(); //Filtering inline
-				prepareGraph();
+				filterOut();
+				buildGraph();
 				displayGraph();
 			}
 		},
@@ -390,20 +366,20 @@ export default {
 			hmLog("Context type is now: " + newVal);
 			currentContextType = newVal;
 			optFieldsChangedHandler("contextType", currentContextType, false);
-            filterOut(); //Filtering inline
-            prepareGraph();
+            filterOut();
+            buildGraph();
             displayGraph();
         },
         consoleLogging: function(newVal, oldVal) {
 			console.log("Console log: " + (newVal == true ? "ON" : "OFF"));
-            consoleLogging = newVal;
-			optFieldsChangedHandler("consoleLogging", consoleLogging, false);
+            setHmLogging(newVal);
+			optFieldsChangedHandler("consoleLogging", newVal, false);
         },
 		contextProps: function(newVal, oldVal) {
 			hmLog("Redoing context props");
 			optFieldsChangedHandler("contextProps", newVal, false);
 			contextProps = parseCProps(newVal);
-			prepareGraph();
+			buildGraph();
 			displayGraph();
 		},
 		filter: function (newVal, oldVal) {
@@ -426,6 +402,14 @@ export default {
 			contextType_field = newVal;
 			optFieldsChangedHandler("contextTypeField", contextType_field, true);
         },
+        graphEngine: function(newVal, oldVal) {
+			graphEngine = newVal;
+			optFieldsChangedHandler("graphEngine", graphEngine, false);
+			setEngine();
+			filterOut();
+            buildGraph();
+            displayGraph();
+        }
     },
     setup(props, context) {
 	    onMounted(() => {
@@ -453,8 +437,15 @@ export default {
 			// PERSISTENCE
 			currentSplines = props.spline;
 			currentConcentrated = props.currentConcentrated;
-			consoleLogging = props.consoleLogging;
 			currentContextType = props.contextType;
+			graphEngine = props.graphEngine;
+
+			console.log("Setting engine...");
+			setEngine();
+
+			let clState = props.consoleLogging == true ? "ON" : "OFF";
+			console.log(`Setting console logging: ${clState}`);
+			setHmLogging(props.consoleLogging);
 		});
 	},
 };
