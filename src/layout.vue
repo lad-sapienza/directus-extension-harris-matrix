@@ -135,7 +135,7 @@ function setEngine() {
 }
 
 function buildGraph() {
-	let graphElaboration = prepareGraph(graphItems, contextProps, mapValidTargets());
+	let graphElaboration = prepareGraph(graphItems, contextProps);
 	if(graphElaboration) {
 		currentGraph = graphElaboration.graph;
 		nodesAttributes = graphElaboration.attributes;
@@ -234,15 +234,6 @@ function displayGraph() {
 	setTimeout(addZoomPan, 750);
 }
 
-function mapValidTargets() {
-	//Loop effort to create a map
-	return graphItems.reduce((obj, item) => {
-		return {
-			...obj,
-			[item["context_id"]]: true,
-		};
-	}, {});
-}
 
 function parseCProps(cprops) {
 	hmLog("Parsing context props");

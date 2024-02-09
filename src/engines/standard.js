@@ -1,4 +1,3 @@
-//import { hmLog } from '../utils/hmlog.js';
 var HmLog = require("../utils/hmlog.js");
 
 const engineVersion = function() {
@@ -6,9 +5,16 @@ const engineVersion = function() {
 }
 
 
-const prepareGraph = function(graphItems, contextProps, validTargets) {
+const prepareGraph = function(graphItems, contextProps) {
 	let items = graphItems;
-	//What's happening here again?
+
+	//Loop effort to create a map
+	let validTargets = graphItems.reduce((obj, item) => {
+		return {
+			...obj,
+			[item["context_id"]]: true,
+		};
+	}, {});
 	
 	var nodesAttributes = {};
 	HmLog.hmLog('Vertex count: ' + items.length);
@@ -21,7 +27,7 @@ const prepareGraph = function(graphItems, contextProps, validTargets) {
 		var nodeProps = [`shape="box"`];
 
 		if (node.context_type && contextProps[node.context_type] != null) {
-			//hmLog("Adding " + contextProps[node.context_type] + " as node props");
+			HmLog.hmLog("Adding " + contextProps[node.context_type] + " as node props");
 			nodeProps = contextProps[node.context_type];
 		}
 
@@ -46,7 +52,7 @@ const prepareGraph = function(graphItems, contextProps, validTargets) {
 					} else if (['is the same as', 'is bound to'].includes(child["relationship"])) {
 						relation = `"${otherContextId}" -> "${node["context_id"]}" [style="dashed", color="blue", dir="none"];`;
 					} else {
-						//hmLog(`Not managed: ${child["relationship"]}`);
+						HmLog.hmLog(`Not managed: ${child["relationship"]}`);
 					}
 				}
 
