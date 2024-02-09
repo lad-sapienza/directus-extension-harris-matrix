@@ -219,15 +219,17 @@ function displayGraph() {
 		while (item.firstChild) {
 			item.removeChild(item.firstChild)
 		}
-		let digraph = `digraph { splines=${currentSplines}; concentrated=${currentConcentrated}; ${currentGraph} }`;
-		hmLog("DIGRAPH V2:\n" + digraph);
-		let svg = viz.renderSVGElement(digraph);
-		item.appendChild(svg);
-		[].forEach.call(document.querySelectorAll('g.node'), el => {
-			el.addEventListener('click', function () {
-				displayNodeInfos(el);
+		if (currentGraph) {
+			let digraph = `digraph { splines=${currentSplines}; concentrated=${currentConcentrated}; ${currentGraph} }`;
+			hmLog("DIGRAPH V2:\n" + digraph);
+			let svg = viz.renderSVGElement(digraph);
+			item.appendChild(svg);
+			[].forEach.call(document.querySelectorAll('g.node'), el => {
+				el.addEventListener('click', function () {
+					displayNodeInfos(el);
+				});
 			});
-		});
+		}
 	});
 	setTimeout(addZoomPan, 750);
 }
