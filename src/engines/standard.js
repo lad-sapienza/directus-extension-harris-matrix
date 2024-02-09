@@ -1,4 +1,5 @@
 //import { hmLog } from '../utils/hmlog.js';
+var HmLog = require("../utils/hmlog.js");
 
 const engineVersion = function() {
 	return "Standard engine *** v0.1 ***";
@@ -10,7 +11,7 @@ const prepareGraph = function(graphItems, contextProps, validTargets) {
 	//What's happening here again?
 	
 	var nodesAttributes = {};
-	//hmLog('Vertex count: ' + items.length);
+	HmLog.hmLog('Vertex count: ' + items.length);
 
 	var nodes = [];
 	var arcs = [];
