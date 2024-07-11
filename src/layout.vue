@@ -146,6 +146,7 @@ function mapItems(items) {
 }
 
 function mapStratigraphy(stratigraphyObject) {
+	if (contextId_field == "context_id") return stratigraphyObject;
 	var ns = {};
 	for (let si in stratigraphyObject) {
 		var stratigraphy = stratigraphyObject[si];
