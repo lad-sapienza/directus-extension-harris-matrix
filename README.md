@@ -14,10 +14,6 @@ The [Harris matrix](https://en.wikipedia.org/wiki/Harris_matrix) is a tool used 
 
 [Here](https://caffeineandpizza.info/HMDE) you can find a very extensive tutorial on how to configure your directus collections to be rendered by the HMDE. Currently only in italian. We hope we'll be back with an english version ASAP
 
-<video width="320" height="240" controls>
-  <source src="https://caffeineandpizza.info/HMDE/media/stratigraphy_it.mp4" type="video/mp4">
-</video>
-
 ## Credits
 
 The repository is maintained by [LAD](https://lad.saras.uniroma1.it) and developed by [Domenico Santoro](https://github.com/domesantoro) and [Julian Bogdani](https://github.com/jbogdani).
