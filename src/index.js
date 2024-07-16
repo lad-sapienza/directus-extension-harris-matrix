@@ -3,7 +3,7 @@ import { toRefs } from "vue";
 import { useItems, useCollection, useSync } from "@directus/extensions-sdk";
 import LyoutOptions from "./options.vue";
 import LayoutComponent from "./layout.vue";
-import { LayoutOptions } from "./types";
+import { LayoutOptions } from "./types"; //Cleanup?
 
 export default {
   id: "directus-harris-matrix-layout",

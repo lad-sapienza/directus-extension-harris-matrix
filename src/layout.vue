@@ -168,7 +168,7 @@ function mapItems(items) {
 			"stratigraphy": item["stratigraphy"]
 		}
 		if(contextId_field != contextLabel_field) {
-			let nl = node.label == null ? "-" : node.label;
+			let nl = item[contextLabel_field] == null ? "-" : item[contextLabel_field];
 			nitem["display_label"] = nl;
 		}
 		mapped.push(nitem);
