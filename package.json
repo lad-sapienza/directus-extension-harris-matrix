@@ -46,7 +46,7 @@
         "link": "directus-extension link"
     },
     "devDependencies": {
-        "@directus/extensions-sdk": "10.1.11",
+        "@directus/extensions-sdk": "^10.1.11",
         "viz": "^3.0.1",
         "vue": "^3.3.4"
     },

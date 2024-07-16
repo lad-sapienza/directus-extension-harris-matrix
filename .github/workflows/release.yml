@@ -1,4 +1,4 @@
-name: Automation test
+name: Release automation
 
 on:
   push:
