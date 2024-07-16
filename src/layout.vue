@@ -165,7 +165,11 @@ function mapItems(items) {
 			"label": item[contextLabel_field],
 			"description": item[contentDescription_field],
 			"context_type": item[contextType_field],
-			"stratigraphy": item["stratigraphy"]
+			"stratigraphy": mapStratigraphy(item["stratigraphy"])
+		}
+		if(contextId_field != contextLabel_field) {
+			let nl = item[contextLabel_field] == null ? "-" : item[contextLabel_field];
+			nitem["display_label"] = nl;
 		}
 		if(contextId_field != contextLabel_field) {
 			let nl = item[contextLabel_field] == null ? "-" : item[contextLabel_field];
@@ -174,6 +178,24 @@ function mapItems(items) {
 		mapped.push(nitem);
 	}
 	return mapped;
+}
+
+function mapStratigraphy(stratigraphyObject) {
+	if (contextId_field == "context_id") return stratigraphyObject;
+	var ns = {};
+	for (let si in stratigraphyObject) {
+		var stratigraphy = stratigraphyObject[si];
+		if (stratigraphy["this_context"][contextId_field]) {
+			stratigraphy["this_context"]["context_id"] = stratigraphy["this_context"][contextId_field];
+			delete stratigraphy["this_context"][contextId_field];
+		}
+		if (stratigraphy["other_context"][contextId_field]) {
+			stratigraphy["other_context"]["context_id"] = stratigraphy["other_context"][contextId_field];
+			delete stratigraphy["other_context"][contextId_field];
+		}
+		ns[si] = stratigraphy;
+	}
+	return ns;
 }
 
 function displayNodeInfos(node) {
