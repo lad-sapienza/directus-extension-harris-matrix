@@ -147,11 +147,11 @@ function setEngine() {
 
 function buildGraph() {
 	let graphElaboration = prepareGraph(graphItems, contextProps);
-    setDownloadButton();
     if(graphElaboration) {
 		currentGraph = graphElaboration.graph;
 		nodesAttributes = graphElaboration.attributes;
 	}
+    setTimeout(setDownloadButton, 1000);
 }
 
 function setDownloadButton() {
