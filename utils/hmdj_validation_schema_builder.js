@@ -31,7 +31,10 @@ let kOBJ_SCHEMA = {
         },
         "properties": {
             "description": "Style properties",
-            "type": ["string", "null"]
+            "type": "array",
+            "items": {
+                "type": "string"
+            }
         },
         "label": {
             "description": "Node label",
