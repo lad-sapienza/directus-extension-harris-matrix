@@ -165,7 +165,7 @@ function buildGraph() {
 
 function setDownloadButtonVisibility(hide) {
     if (document.getElementById('download-button')) {
-        let dis = hide == true ? "block" : "none";
+        let dis = hide == true ? "none" : "block";
         document.getElementById('download-button').style.display = dis;
     }
 }
