@@ -57,6 +57,13 @@
                 "string",
                 "null"
             ]
+        },
+        "url": {
+            "description": "The resource url",
+            "type": [
+                "string",
+                "null"
+            ]
         }
     },
     "required": [

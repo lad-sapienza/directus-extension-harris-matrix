@@ -25,7 +25,7 @@ const HMDJ = function(mapping) {
         if(relationships) { rels = relationships; }
         
         if (nodeIdKey in context) {
-            let nodeId = context[nodeIdKey];
+            let nodeId = `${context[nodeIdKey]}`;
             this.nodes[nodeId] = {
                 "id": nodeId,
                 "relationships": rels

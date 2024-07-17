@@ -40,6 +40,13 @@ let kOBJ_SCHEMA = {
         "description": {
             "description": "Node description",
             "type": ["string", "null"]
+        },
+        "url": {
+            "description": "The resource url",
+            "type": [
+                "string",
+                "null"
+            ]
         }
     },
     "required": ["id", "relationships"]
