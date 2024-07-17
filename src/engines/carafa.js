@@ -1,5 +1,6 @@
 var HmLog = require("../utils/hmlog.js");
-var HMDJ = require("../utils/hmdj.js");
+var HMDJModule = require("../utils/hmdj.js");
+var hmdj;
 
 const hmdjMapping = {
     "context_id": "id",
@@ -16,16 +17,22 @@ const engineVersion = function() {
 	return "Carafa engine *** v0.1 ***";
 }
 
+const fetchDataPackage = function(as_array) {
+    if(hmdj) {
+       return hmdj.stringify(as_array);
+    }
+    return null;
+}
 
 const prepareGraph = function(graphItems, contextProps) {
 	let items = graphItems;
-
+    var nodesAttributes = {};
+    
     for (var pk in contextProps) {
         hmdjMapping["properties"]["values"][pk] = contextProps[pk];
     }
 
-    let hmdj = new HMDJ.HMDJ(hmdjMapping);
-    var nodesAttributes = {};
+    hmdj = new HMDJModule.HMDJ(hmdjMapping);
     
     HmLog.hmLog('Vertex count: ' + items.length);
 
@@ -69,4 +76,4 @@ const prepareGraph = function(graphItems, contextProps) {
     return {"graph": "", "attributes": nodesAttributes};
 }
 
-module.exports = { engineVersion, prepareGraph }
+module.exports = { engineVersion, prepareGraph, fetchDataPackage }

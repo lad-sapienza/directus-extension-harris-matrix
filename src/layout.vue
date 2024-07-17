@@ -2,6 +2,7 @@
 	<div class="layout-harris-matrix">
 		<div v-if="!loading">
 			<div id="div-graph"></div>
+            <div id="download-button" onclick="downloadDataPackage();"><span>download hmdj</span></div>
 		</div>
 		<div id="info">
 			<h2>
@@ -72,6 +73,14 @@
 	margin: 10px;
 	cursor: pointer;
 }
+
+#download-button {
+   display: none;
+   cursor: pointer;
+   float: left;
+   margin-top: 10px;
+   margin-lef: 10px;
+}
 </style>
 
 <script>
@@ -118,28 +127,64 @@ var graphEngine = "standard";
 
 var prepareGraph = function() { console.log("******** ENGINE NOT SET *********"); }
 var engineVersion = "******** ENGINE NOT SET *********";
+var fetchDataPackage = null;
 
 function setEngine() {
+    var hideDB = true;
 	if(graphEngine == "standard") {
 		prepareGraph = StandardEngine.prepareGraph;
 		engineVersion = StandardEngine.engineVersion;
+        fetchDataPackage = null;
 	} else if(graphEngine == "carafa") {
 		prepareGraph = CarafaEngine.prepareGraph;
 		engineVersion = CarafaEngine.engineVersion;
+        fetchDataPackage = CarafaEngine.fetchDataPackage;
+        hideDB = false;
 	} else {
 		prepareGraph = function() { console.log("******** ENGINE NOT SET *********"); }
 		engineVersion = "******** ENGINE NOT SET *********";
+        fetchDataPackage = null;
 	}
+    setDownloadButtonVisibility(hideDB);
 	hmLog("Engine set!");
 	hmLog(engineVersion);
 }
 
 function buildGraph() {
 	let graphElaboration = prepareGraph(graphItems, contextProps);
-	if(graphElaboration) {
+    if(fetchDataPackage) {
+        var dataPackage = fetchDataPackage(false);
+        hmLog("Data package:");
+        hmLog(dataPackage);
+    }
+    if(graphElaboration) {
 		currentGraph = graphElaboration.graph;
 		nodesAttributes = graphElaboration.attributes;
 	}
+}
+
+function setDownloadButtonVisibility(hide) {
+    if (document.getElementById('download-button')) {
+        let dis = hide == true ? "block" : "none";
+        document.getElementById('download-button').style.display = dis;
+    }
+}
+
+function downloadDataPackage() {
+    if(fetchDataPackage) {
+        var dataPackage = fetchDataPackage(false);
+        if(dataPackage) {
+            var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(dataPackage);
+            var downloadAnchorNode = document.createElement('a');
+            downloadAnchorNode.setAttribute("href", dataStr);
+            downloadAnchorNode.setAttribute("download", "export.json");
+            document.body.appendChild(downloadAnchorNode); // required for firefox
+            downloadAnchorNode.click();
+            downloadAnchorNode.remove();
+        } else {
+            hmLog("Could not find something to export!");
+        }
+    }
 }
 
 function resetInfo() {
