@@ -2,7 +2,7 @@
 	<div class="layout-harris-matrix">
 		<div v-if="!loading">
 			<div id="div-graph"></div>
-            <div id="download-button" onclick="downloadDataPackage();"><span>download hmdj</span></div>
+            <div id="download-button"><a id="download-anchor" download="hmdj.json">download hmdj</a></div>
 		</div>
 		<div id="info">
 			<h2>
@@ -75,11 +75,9 @@
 }
 
 #download-button {
-   display: none;
-   cursor: pointer;
-   float: left;
-   margin-top: 10px;
-   margin-lef: 10px;
+    top: 10px;
+    left: 10px;
+    position: absolute;
 }
 </style>
 
@@ -130,8 +128,7 @@ var engineVersion = "******** ENGINE NOT SET *********";
 var fetchDataPackage = null;
 
 function setEngine() {
-    var hideDB = true;
-	if(graphEngine == "standard") {
+    if(graphEngine == "standard") {
 		prepareGraph = StandardEngine.prepareGraph;
 		engineVersion = StandardEngine.engineVersion;
         fetchDataPackage = null;
@@ -139,34 +136,36 @@ function setEngine() {
 		prepareGraph = CarafaEngine.prepareGraph;
 		engineVersion = CarafaEngine.engineVersion;
         fetchDataPackage = CarafaEngine.fetchDataPackage;
-        hideDB = false;
 	} else {
 		prepareGraph = function() { console.log("******** ENGINE NOT SET *********"); }
 		engineVersion = "******** ENGINE NOT SET *********";
         fetchDataPackage = null;
 	}
-    setDownloadButtonVisibility(hideDB);
 	hmLog("Engine set!");
 	hmLog(engineVersion);
 }
 
 function buildGraph() {
 	let graphElaboration = prepareGraph(graphItems, contextProps);
-    if(fetchDataPackage) {
-        var dataPackage = fetchDataPackage(false);
-        hmLog("Data package:");
-        hmLog(dataPackage);
-    }
+    setDownloadButton();
     if(graphElaboration) {
 		currentGraph = graphElaboration.graph;
 		nodesAttributes = graphElaboration.attributes;
 	}
 }
 
-function setDownloadButtonVisibility(hide) {
+function setDownloadButton() {
     if (document.getElementById('download-button')) {
-        let dis = hide == true ? "none" : "block";
-        document.getElementById('download-button').style.display = dis;
+        if(fetchDataPackage) {
+            var dataPackage = fetchDataPackage(false);
+            hmLog("Data package:");
+            hmLog(dataPackage);
+            var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(dataPackage);
+            document.getElementById('download-anchor').href = dataStr;
+            document.getElementById('download-button').style.display = "block";
+        } else {
+            document.getElementById('download-button').style.display = "none";
+        }
     }
 }
 
