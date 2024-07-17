@@ -1,0 +1,66 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://github.com/lab-archeologia-digitale/directus-extension-harris-matrix/hmdj.schema.json",
+    "title": "HARRIS MATRIX DATA JSON validation schema",
+    "description": "A proposal fora a Harris Matrix digital data standard",
+    "type": "object",
+    "properties": {
+        "id": {
+            "description": "The unique identifier for a context",
+            "type": "string"
+        },
+        "relationships": {
+            "description": "The relationships array",
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "type": {
+                        "description": "The type of relationship the context can have",
+                        "type": "string"
+                    },
+                    "context": {
+                        "description": "The related related",
+                        "type": "string"
+                    },
+                    "dag": {
+                        "description": "Should this relation be enlisted on a DAG?",
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "type",
+                    "context",
+                    "dag"
+                ]
+            },
+            "minItems": 0,
+            "uniqueItems": true
+        },
+        "properties": {
+            "description": "Style properties",
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "label": {
+            "description": "Node label",
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "description": {
+            "description": "Node description",
+            "type": [
+                "string",
+                "null"
+            ]
+        }
+    },
+    "required": [
+        "id",
+        "relationships"
+    ]
+}
