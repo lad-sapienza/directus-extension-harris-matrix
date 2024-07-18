@@ -1,7 +1,7 @@
 {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
     "$id": "https://github.com/lab-archeologia-digitale/directus-extension-harris-matrix/hmdj_arr.schema.json",
-    "title": "HARRIS MATRIX DATA JSON validation schema",
+    "title": "HARRIS MATRIX DATA JSON validation schema [ARR]",
     "description": "A proposal fora a Harris Matrix digital data standard (in array mode)",
     "type": "array",
     "items": {
@@ -25,15 +25,20 @@
                             "description": "The related related",
                             "type": "string"
                         },
-                        "dag": {
-                            "description": "Should this relation be enlisted on a DAG?",
-                            "type": "boolean"
+                        "direction": {
+                            "description": "Edge direction value",
+                            "type": "string",
+                            "enum": [
+                                "<-",
+                                "--",
+                                "->"
+                            ]
                         }
                     },
                     "required": [
                         "type",
                         "context",
-                        "dag"
+                        "direction"
                     ]
                 },
                 "minItems": 0,

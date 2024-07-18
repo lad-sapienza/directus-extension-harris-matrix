@@ -23,15 +23,20 @@
                         "description": "The related related",
                         "type": "string"
                     },
-                    "dag": {
-                        "description": "Should this relation be enlisted on a DAG?",
-                        "type": "boolean"
+                    "direction": {
+                        "description": "Edge direction value",
+                        "type": "string",
+                        "enum": [
+                            "<-",
+                            "--",
+                            "->"
+                        ]
                     }
                 },
                 "required": [
                     "type",
                     "context",
-                    "dag"
+                    "direction"
                 ]
             },
             "minItems": 0,

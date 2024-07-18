@@ -19,12 +19,13 @@ let kOBJ_SCHEMA = {
                         "description": "The related related",
                         "type": "string"
                     },
-                    "dag": {
-                        "description": "Should this relation be enlisted on a DAG?",
-                        "type": "boolean"
+                    "direction": {
+                        "description": "Edge direction value",
+                        "type": "string",
+                        "enum": ["<-", "--", "->"]
                     }
                 },
-                "required": ["type", "context", "dag"]
+                "required": ["type", "context", "direction"]
             },
             "minItems": 0,
             "uniqueItems": true
@@ -92,16 +93,16 @@ function buildSchema(type) {
         ks["items"]["type"] = kOBJ_SCHEMA["type"];
         ks["items"]["properties"] = kOBJ_SCHEMA["properties"];
         ks["items"]["required"] = kOBJ_SCHEMA["required"];
-    } else if (type == "dict") {
-        var ks = Object.assign({}, kSCHEMA_PATTERN);
-        ks["patternProperties"]["^\\w+$"]["type"] = kOBJ_SCHEMA["type"];
-        ks["patternProperties"]["^\\w+$"]["properties"] = kOBJ_SCHEMA["properties"];
-        ks["patternProperties"]["^\\w+$"]["required"] = kOBJ_SCHEMA["required"];
-    } else {
+    } else if (type == "plain") {
         var ks = Object.assign({}, kSCHEMA);
         ks["type"] = kOBJ_SCHEMA["type"];
         ks["properties"] = kOBJ_SCHEMA["properties"];
         ks["required"] = kOBJ_SCHEMA["required"];
+    } else {
+        var ks = Object.assign({}, kSCHEMA_PATTERN);
+        ks["patternProperties"]["^\\w+$"]["type"] = kOBJ_SCHEMA["type"];
+        ks["patternProperties"]["^\\w+$"]["properties"] = kOBJ_SCHEMA["properties"];
+        ks["patternProperties"]["^\\w+$"]["required"] = kOBJ_SCHEMA["required"];
     }
     
     return ks;
