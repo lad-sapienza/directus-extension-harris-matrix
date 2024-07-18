@@ -12,37 +12,34 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: ⬇️ Checkout code
         uses: actions/checkout@v4
-      - name: Use Node.js
+      
+      - name: 🪢 Use Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '21.x'
-      - name: npm install and build
+      
+      - name: ⚙️ npm install and build
         run: |
           npm install
           npm run build
 
-      - name: Archive production artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: dist
-          path: dist
-
-      - name: Read version infos
+      - name: 🔢 Read version infos
         id: version-infos
         uses: jaywcjlove/github-action-read-file@main
         with:
           branch: main
           path: release.ver
-      - name: Read version changelog
+      
+      - name: 📄 Read version changelog
         id: version-chl
         uses: jaywcjlove/github-action-read-file@main
         with:
           branch: main
           path: release.chl
 
-      - name: Create Release
+      - name: 🛠️ Create Release
         id: create_release
         uses: actions/create-release@v1
         env:
@@ -56,3 +53,13 @@ jobs:
             ${{ steps.version-chl.outputs.content }}
           draft: false
           prerelease: false
+          
+      - name: ⬆️ Upload artifact
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./dist/index.js
+          asset_name: dist/index.js
+          asset_content_type: text/javascript
