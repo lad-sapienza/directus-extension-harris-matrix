@@ -52,36 +52,44 @@ if [[ "$RELEASE_MODE" != "J" ]]; then
         INC=$((${CVD_SPLIT[2]} + 1))
         NEXT_VERSION="v${CVD_SPLIT[0]}.${CVD_SPLIT[1]}.$INC"
     fi
+
+    echo "$NEXT_VERSION" > "$RELEASE_VER"
+
+    > "$RELEASE_CHL"
+    CHANGE_LINES_LOG=""
+    echo ""
+    echo "Insert release changes (input blank to end)"
+    while true
+    do
+        read CHANGE_LINE
+        if [[ "$CHANGE_LINE" == "" ]]; then
+            break
+        fi
+        echo "- $CHANGE_LINE" >> "$RELEASE_CHL"
+        echo "-----------------------------------------------------------------------------------------------------"
+        CHANGE_LINES_LOG="$CHANGE_LINES_LOG\n* $CHANGE_LINE\n"
+    done
+
+    echo "Versioning time: $(date +"%H:%M")" >> "$RELEASE_CHL"
+
 fi
-
-echo "$NEXT_VERSION" > "$RELEASE_VER"
-
-> "$RELEASE_CHL"
-CHANGE_LINES_LOG=""
-echo ""
-echo "Insert release changes (input blank to end)"
-while true
-do
-    read CHANGE_LINE
-    if [[ "$CHANGE_LINE" == "" ]]; then
-        break
-    fi
-    echo "- $CHANGE_LINE" >> "$RELEASE_CHL"
-    echo "-----------------------------------------------------------------------------------------------------"
-    CHANGE_LINES_LOG="$CHANGE_LINES_LOG\n* $CHANGE_LINE\n"
-done
-
-echo "Versioning time: $(date +"%H:%M")" >> "$RELEASE_CHL"
-
 
 echo ""
 echo "************************************************************************************************************"
 echo "Release mode: $RELEASE_MODE"
 echo "Current version: $CURRENT_VERSION"
-echo "Next version: $NEXT_VERSION"
-echo "Changes in this version ------------------------------------------------------------------------------------"
-echo "$CHANGE_LINES_LOG"
+if [[ "$RELEASE_MODE" != "J" ]]; then
+    echo "Next version: $NEXT_VERSION"
+    echo "Changes in this version ------------------------------------------------------------------------------------"
+    echo "$CHANGE_LINES_LOG"
+fi
 echo "************************************************************************************************************"
+
+
+if [[ "$RELEASE_MODE" == "J" ]]; then
+    echo ""
+    exit 0
+fi
 
 CONTINUE_CMD="y"
 echo ""
