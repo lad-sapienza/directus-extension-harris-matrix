@@ -4,6 +4,35 @@ echo "******************************************************"
 echo "****** DIRECTUS HARRIS MATRIX RELEASE PROCEDURE ******"
 echo "******************************************************"
 echo ""
+
+USE_JQ="Y"
+if ! command -v jq &> /dev/null
+then
+   USE_JQ="N"
+fi
+
+if [[ "$USE_JQ" == "N" ]]; then
+    echo ""
+    echo "******************************************************"
+    echo "**                 JQ NOT DETECTED                  **"
+    echo "** jq sets the correct HMDE version on package.json **"
+    echo "******************************************************"
+    echo ""
+    echo "- (e)xit and install jq"
+    echo "- (c)ontinue: i've manually modified pacakge.json"
+    echo ""
+    echo "Your choice (e):"
+    read USE_JQ_IPT
+
+    if [[ "$USE_JQ_IPT" != "c" ]]; then
+        echo ""
+        echo "Ok then... Leaving..."
+        echo ""
+        exit 1
+    fi
+fi
+
+
 SCRIPT_PATH="$(dirname "$0")"
 cd "$SCRIPT_PATH"
 
@@ -37,6 +66,7 @@ fi
 
 CURRENT_VERSION=$(<"$RELEASE_VER")
 NEXT_VERSION="$CURRENT_VERSION"
+NEXT_VERSION_NUM=""
 
 if [[ "$RELEASE_MODE" != "J" ]]; then
     CV_DOTS="${CURRENT_VERSION:1}"
@@ -44,44 +74,52 @@ if [[ "$RELEASE_MODE" != "J" ]]; then
 
     if [[ "$RELEASE_MODE" == "Ma" ]]; then
         INC=$((${CVD_SPLIT[0]} + 1))
-        NEXT_VERSION="v$INC.0.0"
+        NEXT_VERSION_NUM="$INC.0.0"
     elif [[ "$RELEASE_MODE" == "M" ]]; then
         INC=$((${CVD_SPLIT[1]} + 1))
-        NEXT_VERSION="v${CVD_SPLIT[0]}.$INC.0"
+        NEXT_VERSION_NUM="${CVD_SPLIT[0]}.$INC.0"
     else
         INC=$((${CVD_SPLIT[2]} + 1))
-        NEXT_VERSION="v${CVD_SPLIT[0]}.${CVD_SPLIT[1]}.$INC"
+        NEXT_VERSION_NUM="${CVD_SPLIT[0]}.${CVD_SPLIT[1]}.$INC"
     fi
+    
+    NEXT_VERSION="v$NEXT_VERSION_NUM"
+
+    > "$RELEASE_CHL"
+    CHANGE_LINES_LOG=""
+    echo ""
+    echo "Insert release changes (input blank to end)"
+    while true
+    do
+        read CHANGE_LINE
+        if [[ "$CHANGE_LINE" == "" ]]; then
+            break
+        fi
+        echo "- $CHANGE_LINE" >> "$RELEASE_CHL"
+        echo "-----------------------------------------------------------------------------------------------------"
+        CHANGE_LINES_LOG="$CHANGE_LINES_LOG\n* $CHANGE_LINE\n"
+    done
+
+    echo "Versioning time: $(date +"%H:%M")" >> "$RELEASE_CHL"
+
 fi
-
-echo "$NEXT_VERSION" > "$RELEASE_VER"
-
-> "$RELEASE_CHL"
-CHANGE_LINES_LOG=""
-echo ""
-echo "Insert release changes (input blank to end)"
-while true
-do
-    read CHANGE_LINE
-    if [[ "$CHANGE_LINE" == "" ]]; then
-        break
-    fi
-    echo "- $CHANGE_LINE" >> "$RELEASE_CHL"
-    echo "-----------------------------------------------------------------------------------------------------"
-    CHANGE_LINES_LOG="$CHANGE_LINES_LOG\n* $CHANGE_LINE\n"
-done
-
-echo "Versioning time: $(date +"%H:%M")" >> "$RELEASE_CHL"
-
 
 echo ""
 echo "************************************************************************************************************"
 echo "Release mode: $RELEASE_MODE"
 echo "Current version: $CURRENT_VERSION"
-echo "Next version: $NEXT_VERSION"
-echo "Changes in this version ------------------------------------------------------------------------------------"
-echo "$CHANGE_LINES_LOG"
+if [[ "$RELEASE_MODE" != "J" ]]; then
+    echo "Next version: $NEXT_VERSION"
+    echo "Changes in this version ------------------------------------------------------------------------------------"
+    echo "$CHANGE_LINES_LOG"
+fi
 echo "************************************************************************************************************"
+
+
+if [[ "$RELEASE_MODE" == "J" ]]; then
+    echo ""
+    exit 0
+fi
 
 CONTINUE_CMD="y"
 echo ""
@@ -101,6 +139,13 @@ if [ "$CONTINUE_CMD" != "y" ] && [ "$CONTINUE_CMD" != "Y" ]; then
     echo ""
     exit 0
 fi
+
+if [[ "$USE_JQ" != "N" ]]; then
+    JQP=$(jq ".version = \"$NEXT_VERSION_NUM\"" package.json)
+    echo "$JQP" > package.json
+fi
+
+echo "$NEXT_VERSION" > "$RELEASE_VER"
 
 echo ""
 echo "Committing..."
