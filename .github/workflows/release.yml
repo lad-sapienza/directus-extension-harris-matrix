@@ -66,5 +66,5 @@ jobs:
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ./dist.zip
-          asset_name: directus-extension-directus-harris-matrix.zip
+          asset_name: directus-extension-harris-matrix.zip
           asset_content_type: application/zip
