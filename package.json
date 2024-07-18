@@ -1,61 +1,61 @@
 {
-    "name": "directus-extension-harris-matrix",
-    "description": "Please enter a description for your extension",
-    "homepage": "https://github.com/lab-archeologia-digitale/directus-extension-harris-matrix",
-    "bugs": {
-        "url": "https://github.com/lab-archeologia-digitale/directus-extension-harris-matrix/issues"
-    },
-    "icon": "extension",
-    "version": "0.0.1",
-    "keywords": [
-        "directus",
-        "directus-extension",
-        "directus-custom-layout",
-        "archaeology",
-        "archaeologic-stratigraphy",
-        "harris-matrix",
-        "graph-layout"
-    ],
-    "type": "module",
-    "license": "AGPL-3.0",
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/lab-archeologia-digitale/directus-extension-harris-matrix.git"
-    },
-    "author": {
-        "name": "Domenico Santoro",
-        "url": "https://github.com/domesantoro"
-    },
-    "contributors": [
-        {
-            "name": "Julian Bogdani",
-            "email": "julian.bogdani@uniroma1.it",
-            "url": "https://github.com/jbogdani"
-        }
-    ],
-    "directus:extension": {
-        "type": "layout",
-        "path": "dist/index.js",
-        "source": "src/index.js",
-        "host": "^10.1.11"
-    },
-    "scripts": {
-        "build": "directus-extension build",
-        "buildnm": "directus-extension build --no-minify",
-        "dev": "directus-extension build -w --no-minify",
-        "link": "directus-extension link"
-    },
-    "devDependencies": {
-        "@directus/extensions-sdk": "^10.1.11",
-        "viz": "^3.0.1",
-        "vue": "^3.3.4"
-    },
-    "dependencies": {
-        "@directus/composables": "^10.1.6",
-        "@viz-js/viz": "^3.2.0",
-        "node-sass": "npm:sass@^1.68.0",
-        "sass": "^1.68.0",
-        "svg-pan-zoom": "^3.6.1",
-        "vue-svg-pan-zoom": "^2.1.0"
+  "name": "directus-extension-harris-matrix",
+  "description": "Please enter a description for your extension",
+  "homepage": "https://github.com/lab-archeologia-digitale/directus-extension-harris-matrix",
+  "bugs": {
+    "url": "https://github.com/lab-archeologia-digitale/directus-extension-harris-matrix/issues"
+  },
+  "icon": "extension",
+  "version": "1.1.4",
+  "keywords": [
+    "directus",
+    "directus-extension",
+    "directus-custom-layout",
+    "archaeology",
+    "archaeologic-stratigraphy",
+    "harris-matrix",
+    "graph-layout"
+  ],
+  "type": "module",
+  "license": "AGPL-3.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lab-archeologia-digitale/directus-extension-harris-matrix.git"
+  },
+  "author": {
+    "name": "Domenico Santoro",
+    "url": "https://github.com/domesantoro"
+  },
+  "contributors": [
+    {
+      "name": "Julian Bogdani",
+      "email": "julian.bogdani@uniroma1.it",
+      "url": "https://github.com/jbogdani"
     }
+  ],
+  "directus:extension": {
+    "type": "layout",
+    "path": "dist/index.js",
+    "source": "src/index.js",
+    "host": "^10.1.11"
+  },
+  "scripts": {
+    "build": "directus-extension build",
+    "buildnm": "directus-extension build --no-minify",
+    "dev": "directus-extension build -w --no-minify",
+    "link": "directus-extension link"
+  },
+  "devDependencies": {
+    "@directus/extensions-sdk": "^10.1.11",
+    "viz": "^3.0.1",
+    "vue": "^3.3.4"
+  },
+  "dependencies": {
+    "@directus/composables": "^10.1.6",
+    "@viz-js/viz": "^3.2.0",
+    "node-sass": "npm:sass@^1.68.0",
+    "sass": "^1.68.0",
+    "svg-pan-zoom": "^3.6.1",
+    "vue-svg-pan-zoom": "^2.1.0"
+  }
 }

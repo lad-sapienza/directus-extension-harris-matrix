@@ -140,10 +140,10 @@ if [ "$CONTINUE_CMD" != "y" ] && [ "$CONTINUE_CMD" != "Y" ]; then
     exit 0
 fi
 
-if [[ "$USE_JQ" == "N" ]]; then
-    echo $(jq ".version = \"$NEXT_VERSION_NUM\"" package.json) > package.json
+if [[ "$USE_JQ" != "N" ]]; then
+    JQP=$(jq ".version = \"$NEXT_VERSION_NUM\"" package.json)
+    echo "$JQP" > package.json
 fi
-return 0
 
 echo "$NEXT_VERSION" > "$RELEASE_VER"
 
