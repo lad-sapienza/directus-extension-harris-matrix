@@ -26,7 +26,9 @@ jobs:
           npm run build
 
       - name: 🗜️ Creating artifact zip
-        run: zip -r dist.zip ./dist
+        run: |
+          ls -la
+          zip -r dist.zip ./dist ./package.json
 
       - name: 🔢 Read version infos
         id: version-infos
@@ -64,5 +66,5 @@ jobs:
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ./dist.zip
-          asset_name: dist.zip
+          asset_name: directus-extension-directus-harris-matrix.zip
           asset_content_type: application/zip
