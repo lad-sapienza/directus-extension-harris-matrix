@@ -25,6 +25,9 @@ jobs:
           npm install
           npm run build
 
+      - name: 🗜️ Creating artifact zip
+        run: zip -r dist.zip ./dist
+
       - name: 🔢 Read version infos
         id: version-infos
         uses: jaywcjlove/github-action-read-file@main
@@ -60,6 +63,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./dist/index.js
-          asset_name: dist/index.js
-          asset_content_type: text/javascript
+          asset_path: ./dist.zip
+          asset_name: dist.zip
+          asset_content_type: application/zip
