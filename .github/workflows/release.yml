@@ -23,18 +23,12 @@ jobs:
           npm install
           npm run build
 
-
-      - name: 📦 Zip dist files
-        id: pack
-        uses: ./
-        with:
-          files: dist
-
       - name: ⚙️ Unzip dist files
         run: |
           rm -rf artifact
           mkdir artifact
-          unzip ${{ steps.pack.outputs.archive }} -d artifact
+          #unzip ${{ steps.pack.outputs.archive }} -d artifact
+          ls -la
 
       - name: Read version infos
         id: version-infos
