@@ -28,13 +28,13 @@ jobs:
         id: pack
         uses: ./
         with:
-          files: dist, action.yml
+          files: dist
 
       - name: ⚙️ Unzip dist files
         run: |
-          rm -rf dist
-          mkdir dist
-          unzip ${{ steps.pack.outputs.archive }} -d dist
+          rm -rf artifact
+          mkdir artifact
+          unzip ${{ steps.pack.outputs.archive }} -d artifact
 
       - name: Read version infos
         id: version-infos
