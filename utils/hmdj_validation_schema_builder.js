@@ -16,7 +16,7 @@ let kOBJ_SCHEMA = {
                         "type": "string"
                     },
                     "context": {
-                        "description": "The related related",
+                        "description": "The related context",
                         "type": "string"
                     },
                     "direction": {
