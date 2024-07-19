@@ -47,10 +47,34 @@ let kOBJ_SCHEMA = {
         },
         "url": {
             "description": "The resource url",
-            "type": [
-                "string",
-                "null"
-            ]
+            "type": [ "string", "null" ]
+        },
+        "cluster": {
+            "type": "object",
+            "patternProperties": {
+                "^\\w+$": {
+                    "type": "object",
+                    "properties": {
+                        "id": {
+                            "description": "The unique identifier for a clustered context",
+                            "type": "string"
+                        },
+                        "label": {
+                            "description": "Clustered node label",
+                            "type": ["string", "null"]
+                        },
+                        "description": {
+                            "description": "Clustered node description",
+                            "type": ["string", "null"]
+                        },
+                        "url": {
+                            "description": "The Clustered resource url",
+                            "type": [ "string", "null" ]
+                        }
+                    },
+                    "required": ["id"]
+                }
+            }
         }
     },
     "required": ["id", "relationships"]

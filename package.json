@@ -54,7 +54,7 @@
     "@directus/composables": "^10.1.6",
     "@viz-js/viz": "^3.2.0",
     "node-sass": "npm:sass@^1.68.0",
-    "sass": "^1.68.0",
+    "sass": "^1.77.8",
     "svg-pan-zoom": "^3.6.1",
     "vue-svg-pan-zoom": "^2.1.0"
   }
