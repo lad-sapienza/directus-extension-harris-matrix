@@ -1,5 +1,6 @@
 var HmLog = require("../utils/hmlog.js");
 var JGFModule = require("../utils/jgf.js");
+var CarafaGraph = require("../utils/carafa_graph.js");
 var jgf;
 
 const jgfConfig = {
@@ -73,6 +74,8 @@ const prepareGraph = function(graphItems, contextProps) {
         
         
 	}
+    
+    new CarafaGraph.CarafaGraph(jgf);
 
 	//return {"graph": nodes.join("\n") + "\n" + arcs.join("\n"), "attributes": nodesAttributes};
     return {"graph": "", "attributes": nodesAttributes};

@@ -51,6 +51,7 @@
     "vue": "^3.3.4"
   },
   "dependencies": {
+    "@dagrejs/graphlib": "^2.2.3",
     "@directus/composables": "^10.1.6",
     "@viz-js/viz": "^3.2.0",
     "node-sass": "npm:sass@^1.68.0",
