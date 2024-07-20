@@ -6,7 +6,7 @@ var HmLog = require("./hmlog.js");
 const JGF = function(config) {
     this.id = "jgf_" + new Date().getTime() + "_" + Math.floor(Math.random() * 100000000);
     this.config = config;
-    this.cloded = false;
+    this.closed = false;
     
     if (config && "multi" in config && config["multi"] == false) {
         this.pruneMap = {};
@@ -25,7 +25,7 @@ const JGF = function(config) {
     };
     
     this.close = function() {
-        this.cloded = true;
+        this.closed = true;
     }
     
     this.describe = function() {
@@ -39,7 +39,7 @@ const JGF = function(config) {
     
     this.addNode = function(node, edges) {
         
-        if(this.cloded == true) {
+        if(this.closed == true) {
             HmLog.hmLog("Graph is closed. Could not add node");
             return
         }
@@ -78,7 +78,7 @@ const JGF = function(config) {
     }
     
     this.addEdge = function(edge) {
-        if(this.cloded == true) {
+        if(this.closed == true) {
             HmLog.hmLog("Graph is closed. Could not add edge");
             return
         }

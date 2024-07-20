@@ -213,11 +213,7 @@ function mapItems(items) {
 		}
 		if(contextId_field != contextLabel_field) {
 			let nl = item[contextLabel_field] == null ? "-" : item[contextLabel_field];
-			nitem["display_label"] = nl;
-		}
-		if(contextId_field != contextLabel_field) {
-			let nl = item[contextLabel_field] == null ? "-" : item[contextLabel_field];
-			nitem["display_label"] = nl;
+			nitem["label"] = nl;
 		}
 		mapped.push(nitem);
 	}

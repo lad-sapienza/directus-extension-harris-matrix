@@ -31,7 +31,7 @@ const prepareGraph = function(graphItems, contextProps) {
 			nodeProps = contextProps[node.context_type];
 		}
 
-		if (node.display_label) { nodeProps.push(`label="${node.display_label}"`); }
+        nodeProps.push(`label="${node.label}"`);
 		nodes.push(`"${node["context_id"]}" [${nodeProps.join(",")}];`);
 		nodesAttributes[node["context_id"]] = { "id": node.id, "label": node.label, "text": node.description, "context_type": node.context_type }; //Could not figure out how to access images
 

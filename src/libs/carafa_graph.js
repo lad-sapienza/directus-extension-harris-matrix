@@ -1,8 +1,9 @@
-var HmLog = require("./hmlog.js");
+import { Graph, alg } from "@dagrejs/graphlib";
 //var graphlib = require("graphlib");
-var Graph = graphlib.Graph;
 
-import { graphlib } from "@dagrejs/graphlib";
+//var Graph = graphlib.Graph;
+import HmLog from "../utils/hmlog.js";
+//var HmLog = require("../utils/hmlog.js");
 
 const CarafaGraph = function(jgf) {
     
@@ -20,18 +21,26 @@ const CarafaGraph = function(jgf) {
     /** Seatch for cycles */
     /** Usyally based on DFS algs. Should be O(N) + O(E)*/
     /** TODO: CHECK! */
-    if (graphlib.alg.isAcyclic(c_graph) == true) {
+    if (alg.isAcyclic(c_graph) == true) {
         HmLog.hmLog("Well done... It's an acyclic graph");
     } else {
-        const cycles = JSON.stringify(graphlib.alg.findCycles(this.g));
-        const raise = `Cycles: ${JSON.stringify(graphlib.alg.findCycles(this.g))}`;
+        const cycles = JSON.stringify(alg.findCycles(this.g));
+        const raise = `Cycles: ${JSON.stringify(alg.findCycles(this.g))}`;
         HmLog.hmLog(raise);
         throw raise;
     }
     
     this.g = transitiveReduction(c_graph);
     
-    this.jfg.graph["nodes"] = this.g.nodes().map((x) => this.g.node(x));
+    var cn_nodes = {};
+    const cg_nodes = this.g.nodes();
+    for (var nix in cg_nodes) { //O(N)
+        var nodeId = cg_nodes[nix];
+        cn_nodes[nodeId] = this.g.node(nodeId);
+    }
+    this.jfg.graph["nodes"] = cn_nodes;
+    
+    
     this.jfg.graph["edges"] = this.g.edges().map((x) => this.g.edge(x));
     
     
@@ -41,11 +50,7 @@ const CarafaGraph = function(jgf) {
     //https://www.cs.tufts.edu/comp/150FP/archive/al-aho/transitive-reduction.pdf
     // Non la uso. Troppo complessa. Per ora mi accontento d O(
     // TRED
-    
-    
 }
-
-module.exports = { CarafaGraph }
 
 //O(E) + O(N)
 function clusteredGraph(nodes, edges, clustering_edges) {
@@ -68,7 +73,7 @@ function clusteredGraph(nodes, edges, clustering_edges) {
     var clustered_g = new Graph({ directed: true });
     
     // O(E) [as per https://github.com/zmitry/graphlib/blob/master/README.md#alg-components]
-    const components = graphlib.alg.components(tg);
+    const components = alg.components(tg);
     
     // THIS WILL CYCLE ON ALL THE NODES AND NO MORE, SO IT'S O(N)
     var clusterCounter = 0;
@@ -192,3 +197,6 @@ function dfs(graph, current, end, visited) {
 
     return false;
 }
+
+//module.exports = { CarafaGraph }
+export default CarafaGraph
