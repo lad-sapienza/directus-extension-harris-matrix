@@ -1,6 +1,11 @@
 import { Graph, alg } from "@dagrejs/graphlib";
 import HmLog from "../utils/hmlog.js";
 
+/**
+ This implementation is not strictly compliant with the json graph format because uses some additional metadata expected to be in the jfg
+ It should be cleaned up, to make it fully compliant
+ */
+
 const CarafaGraph = function(jgf, clusterProperties) {
     
     this.clusterProperties = clusterProperties;
