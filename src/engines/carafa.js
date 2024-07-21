@@ -71,8 +71,14 @@ const prepareGraph = function(graphItems, contextProps) {
         
         
 	}
-    const carafaGraph = new CarafaGraph(jgf.graph, contextProps["--ce-cluster"]);
-	return {"graph": carafaGraph.dot().join("\n"), "attributes": carafaGraph.nodesAttributes()};
+    
+    try {
+        const carafaGraph = new CarafaGraph(jgf.graph, contextProps["--ce-cluster"]);
+        return {"graph": carafaGraph.dot().join("\n"), "attributes": carafaGraph.nodesAttributes()};
+    } catch (error) {
+        alert("Error: " + error);
+        return {"graph": "", "attributes": {}};
+    }
 }
 
 module.exports = { engineVersion, prepareGraph, fetchDataPackage }

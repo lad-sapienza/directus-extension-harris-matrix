@@ -4,7 +4,15 @@
 var HmLog = require("./hmlog.js");
 
 const JGF = function(config) {
-    this.id = "jgf_" + new Date().getTime() + "_" + Math.floor(Math.random() * 100000000);
+    const date = new Date();
+    var dateString = ("0" + date.getDate()).slice(-2) + "/" +
+            ("0" + (date.getMonth()+1)).slice(-2) + "/" +
+            date.getFullYear() + " " +
+            ("0" + date.getHours()).slice(-2) + ":" +
+            ("0" + date.getMinutes()).slice(-2) + ":" +
+            ("0" + date.getSeconds()).slice(-2);
+    
+    this.id = "jgf_" + date.getTime() + "_" + Math.floor(Math.random() * 100000000);
     this.config = config;
     this.closed = false;
     
@@ -12,10 +20,12 @@ const JGF = function(config) {
         this.pruneMap = {};
     }
     
+    
+    
     this.graph = {
         "graph": {
             "id": this.id,
-            "label": "JGF produced at [HH:mm]",
+            "label": `JGF produced at ${dateString}`,
             "directed": false,
             "type": "",
             "metadata": {},

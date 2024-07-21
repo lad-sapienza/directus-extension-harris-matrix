@@ -26,8 +26,8 @@ const CarafaGraph = function(jgf, clusterProperties) {
     if (alg.isAcyclic(c_graph) == true) {
         HmLog.hmLog("Well done... It's an acyclic graph");
     } else {
-        const cycles = JSON.stringify(alg.findCycles(this.g));
-        const raise = `Cycles: ${JSON.stringify(alg.findCycles(this.g))}`;
+        const cycles = JSON.stringify(alg.findCycles(c_graph));
+        const raise = `Cycles have been detected: ${JSON.stringify(alg.findCycles(c_graph))}`;
         HmLog.hmLog(raise);
         throw raise;
     }
@@ -59,7 +59,7 @@ const CarafaGraph = function(jgf, clusterProperties) {
                 if (node["metadata"]["clustered"] == true && clusterProperties) {
                     nodeProps = Object.assign([], clusterProperties);
                 } else {
-                    nodeProps = Object.assign([], node["metadata"]);
+                    nodeProps = Object.assign([], node["metadata"]["properties"]);
                 }
                 nodeProps.push(`label="${node["label"]}"`);
             }
@@ -207,6 +207,7 @@ function clusteredGraph(nodes, edges, clustering_edges) {
 // ERGO NEXT VERSION SHOULD ABSOLUTELY BE DEVELOPED AFTRE CHECKING
 // Aho et al. -> https://www.cs.tufts.edu/comp/150FP/archive/al-aho/transitive-reduction.pdf
 function transitiveReduction(graph) {
+    HmLog.hmLog("[TRED] - **************************** TRED");
     const reducedGraph = new Graph({ directed: true });
     
     // O(N + E)
@@ -221,15 +222,23 @@ function transitiveReduction(graph) {
     graph.edges().forEach(({ v, w }) => {
         reducedGraph.removeEdge(v, w);
 
+        HmLog.hmLog(`[TRED] - Testing edge ${v}->${w} -----------------------`);
+        
         // Is there any path without it?
         if (hasPath(reducedGraph, v, w, pathCache) == false) {
             //Nope, let's reintegrate the edge
             reducedGraph.setEdge(v, w, graph.edge(v, w));
+            HmLog.hmLog(`[TRED] ${v}->${w} is necessary! -----------------------`);
+        } else {
+            HmLog.hmLog(`[TRED] ${v}->${w} is redundant! -----------------------`);
         }
     });
 
+    HmLog.hmLog("[TRED] - **************************** TRED");
     return reducedGraph;
 }
+
+
 
 // DFS + caching (Using dfs should be on O(N + E)
 function hasPath(graph, start, end, pathCache) {
@@ -246,13 +255,15 @@ function hasPath(graph, start, end, pathCache) {
 
 // DFS calculus which has O(N + E)
 function dfs(graph, current, end, visited) {
-    if (current === end) return true;
+    if (current === end) {
+        HmLog.hmLog(`[TRED] FOUND ${end}!`);
+        return true;
+    }
     visited.add(current);
 
     for (const successor of graph.successors(current)) {
-        if (visited.has(successor) == false) {
-            return dfs(graph, successor, end, visited);
-        }
+        if (visited.has(successor) == true) { continue; }
+        if (dfs(graph, successor, end, visited) == true) { return true; }
     }
 
     return false;
