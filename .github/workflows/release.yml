@@ -28,7 +28,7 @@ jobs:
       - name: 🗜️ Creating artifact zip
         run: |
           ls -la
-          zip -r dist.zip ./dist ./package.json
+          zip -r dist.zip ./dist ./node_modules ./package.json
 
       - name: 🔢 Read version infos
         id: version-infos
