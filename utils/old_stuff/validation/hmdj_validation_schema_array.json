@@ -1,0 +1,121 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://github.com/lab-archeologia-digitale/directus-extension-harris-matrix/hmdj_arr.schema.json",
+    "title": "HARRIS MATRIX DATA JSON validation schema [ARR]",
+    "description": "A proposal fora a Harris Matrix digital data standard (in array mode)",
+    "type": "array",
+    "items": {
+        "type": "object",
+        "properties": {
+            "id": {
+                "description": "The unique identifier for a context",
+                "type": "string"
+            },
+            "relationships": {
+                "description": "The relationships array",
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "type": {
+                            "description": "The type of relationship the context can have",
+                            "type": "string"
+                        },
+                        "context": {
+                            "description": "The related context",
+                            "type": "string"
+                        },
+                        "direction": {
+                            "description": "Edge direction value",
+                            "type": "string",
+                            "enum": [
+                                "<-",
+                                "--",
+                                "->"
+                            ]
+                        }
+                    },
+                    "required": [
+                        "type",
+                        "context",
+                        "direction"
+                    ]
+                },
+                "minItems": 0,
+                "uniqueItems": true
+            },
+            "properties": {
+                "description": "Style properties",
+                "type": "array",
+                "items": {
+                    "type": "string"
+                }
+            },
+            "label": {
+                "description": "Node label",
+                "type": [
+                    "string",
+                    "null"
+                ]
+            },
+            "description": {
+                "description": "Node description",
+                "type": [
+                    "string",
+                    "null"
+                ]
+            },
+            "url": {
+                "description": "The resource url",
+                "type": [
+                    "string",
+                    "null"
+                ]
+            },
+            "cluster": {
+                "type": "object",
+                "patternProperties": {
+                    "^\\w+$": {
+                        "type": "object",
+                        "properties": {
+                            "id": {
+                                "description": "The unique identifier for a clustered context",
+                                "type": "string"
+                            },
+                            "label": {
+                                "description": "Clustered node label",
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "description": {
+                                "description": "Clustered node description",
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "url": {
+                                "description": "The Clustered resource url",
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            }
+                        },
+                        "required": [
+                            "id"
+                        ]
+                    }
+                }
+            }
+        },
+        "required": [
+            "id",
+            "relationships"
+        ]
+    },
+    "minItems": 0,
+    "uniqueItems": true
+}

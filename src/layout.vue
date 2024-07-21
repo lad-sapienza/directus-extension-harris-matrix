@@ -1,7 +1,9 @@
 <template>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 	<div class="layout-harris-matrix">
 		<div v-if="!loading">
 			<div id="div-graph"></div>
+            <a id="download-anchor" download="hmdj.json" title="download your hmdj file"><i class="fa-solid fa-download"></i></a>
 		</div>
 		<div id="info">
 			<h2>
@@ -11,7 +13,6 @@
 			</h2>
 			<div id="context_description"></div>
 			<div id="action_container">
-				<div id="view_record"></div>
 				<div><span id="info-close">Close</span></div>
 			</div>
 		</div>
@@ -72,6 +73,22 @@
 	margin: 10px;
 	cursor: pointer;
 }
+
+#download-anchor {
+    top: 10px;
+    left: calc(var(--content-padding) + 10px);
+    position: absolute;
+    padding: 4px;
+    background-color: var(--v-button-background-color);
+    border-radius: 5px;
+    width: 2vw;
+    text-align: center;
+    cursor: pointer;
+}
+
+#download-anchor i {
+    color: white;
+}
 </style>
 
 <script>
@@ -85,21 +102,23 @@ import { useApi, useStores } from '@directus/extensions-sdk';
 import svgPanZoom from "svg-pan-zoom";
 import { getCurrentInstance } from 'vue';
 
+import { setHmLogging,  hmLog } from './utils/hmlog.js';
+
+import * as StandardEngine from './engines/standard.js';
+import * as CarafaEngine from './engines/carafa.js';
+
 var collection = null;
 var currentItems = [];
 var graphItems = [];
-var validTargets = [];
 var currentGraph = null;
 var currentSplines = 'ortho';
 var currentConcentrated = false;
 var currentContextType = null;
 var nodesAttributes = {};
-var consoleLogging = false;
 var contextProps = {};
 
 var refreshHandler = null;
 var optFieldsChangedHandler = null;
-
 
 // FIELDS
 var contextId_field = "";
@@ -110,6 +129,65 @@ var contextType_field = "";
 var pk_field = "";
 
 let toogleInfo = false;
+
+
+var graphEngine = "standard";
+
+var prepareGraph = function() { console.log("******** ENGINE NOT SET *********"); }
+var engineVersion = "******** ENGINE NOT SET *********";
+var fetchDataPackage = null;
+
+function setEngine() {
+    if(graphEngine == "standard") {
+		prepareGraph = StandardEngine.prepareGraph;
+		engineVersion = StandardEngine.engineVersion;
+        fetchDataPackage = null;
+	} else if(graphEngine == "carafa") {
+		prepareGraph = CarafaEngine.prepareGraph;
+		engineVersion = CarafaEngine.engineVersion;
+        fetchDataPackage = CarafaEngine.fetchDataPackage;
+	} else {
+		prepareGraph = function() { console.log("******** ENGINE NOT SET *********"); }
+		engineVersion = "******** ENGINE NOT SET *********";
+        fetchDataPackage = null;
+	}
+	hmLog("Engine set!");
+	hmLog(engineVersion);
+}
+
+function buildGraph() {
+	let graphElaboration = prepareGraph(graphItems, contextProps);
+    if(graphElaboration) {
+		currentGraph = graphElaboration.graph;
+		nodesAttributes = graphElaboration.attributes;
+	}
+    setTimeout(setDownloadButton, 1000);
+}
+
+function setDownloadButton() {
+    if (document.getElementById('download-anchor')) {
+        if(fetchDataPackage) {
+            var dataPackage = fetchDataPackage(false);
+            hmLog("Data package:");
+            hmLog(dataPackage);
+            
+            const m = new Date();
+            var dateString = m.getUTCFullYear() + "-" +
+                    ("0" + (m.getUTCMonth()+1)).slice(-2) + "-" +
+                    ("0" + m.getUTCDate()).slice(-2) + "-" +
+                    ("0" + m.getHours()).slice(-2) + "." +
+                    ("0" + m.getMinutes()).slice(-2) + "." +
+                    ("0" + m.getSeconds()).slice(-2);
+            
+            var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(dataPackage);
+            document.getElementById('download-anchor').href = dataStr;
+            document.getElementById('download-anchor').download = `c_export-${dateString}.json`;
+            document.getElementById('download-anchor').style.display = "block";
+        } else {
+            document.getElementById('download-anchor').style.display = "none";
+        }
+    }
+}
 
 function resetInfo() {
 	if (document.getElementById('context_id')) document.getElementById('context_id').innerHTML = "";
@@ -138,7 +216,7 @@ function mapItems(items) {
 		}
 		if(contextId_field != contextLabel_field) {
 			let nl = item[contextLabel_field] == null ? "-" : item[contextLabel_field];
-			nitem["display_label"] = nl;
+			nitem["label"] = nl;
 		}
 		mapped.push(nitem);
 	}
@@ -168,7 +246,21 @@ function displayNodeInfos(node) {
 	let nid = node.querySelector('title').textContent;
 	let attrs = nodesAttributes[nid];
 
-	document.getElementById('view_record').innerHTML = `<a href="./content/${collection}/${attrs.id}" style="cursor: pointer;">View record</a>`;
+
+    if(document.getElementById('action_container')) {
+        document.querySelectorAll('.resource_linker').forEach(e => e.remove());
+        if (attrs.context_type == "cluster" && "clustered_metadata" in attrs) {
+            // TODO: Fix cluster visualization of linked resources
+            var cmks = Object.keys(attrs["clustered_metadata"]).reverse();
+            for (var cmk in cmks) {
+                let key = cmks[cmk];
+                let resource_id = attrs["clustered_metadata"][key]["resource_id"];
+                prependRecordLink(document.getElementById('action_container'), {"id": resource_id, "label": key});
+            }
+        } else {
+            prependRecordLink(document.getElementById('action_container'), {"id": attrs.resource_id});
+        }
+    }
 
 	document.getElementById('context_id').innerHTML = `${attrs.label}`;
 	document.getElementById('context_type').innerHTML = `${attrs.context_type}`;
@@ -178,6 +270,14 @@ function displayNodeInfos(node) {
 	if (svg) svg.style.opacity = 0.3;
 	if (document.getElementById('info')) document.getElementById('info').style.display = "block";
 
+}
+
+function prependRecordLink(to, attrs) {
+        let label = attrs.label == null ? "record" : attrs.label;
+        let div = document.createElement("div");
+        div.classList.add("resource_linker");
+        div.innerHTML = `<a href="./content/${collection}/${attrs.id}" style="cursor: pointer;">View ${label}</a>`;
+        to.prepend(div);
 }
 
 function addZoomPan() {
@@ -199,33 +299,47 @@ function addZoomPan() {
 
 
 function displayGraph() {
+	
 	resetInfo();
 	instance().then(function (viz) {
 		const item = document.querySelector("#div-graph");
 		while (item.firstChild) {
 			item.removeChild(item.firstChild)
 		}
-		let digraph = `digraph { splines=${currentSplines}; concentrated=${currentConcentrated}; ${currentGraph} }`;
-		hmLog("DIGRAPH V2:\n" + digraph);
-		let svg = viz.renderSVGElement(digraph);
-		item.appendChild(svg);
-		[].forEach.call(document.querySelectorAll('g.node'), el => {
-			el.addEventListener('click', function () {
-				displayNodeInfos(el);
+		if (currentGraph) {
+			let digraph = `digraph { splines=${currentSplines}; concentrated=${currentConcentrated}; ${currentGraph} }`;
+			hmLog("DIGRAPH V2:\n" + digraph);
+			let svg = viz.renderSVGElement(digraph);
+			item.appendChild(svg);
+			[].forEach.call(document.querySelectorAll('g.node'), el => {
+				el.addEventListener('click', function () {
+					displayNodeInfos(el);
+				});
 			});
-		});
+		}
 	});
 	setTimeout(addZoomPan, 750);
 }
 
-function setValidTargtes() {
-	//Loop effort to create a map
-	validTargets = graphItems.reduce((obj, item) => {
-		return {
-			...obj,
-			[item["context_id"]]: true,
-		};
-	}, {});
+
+function parseCProps(cprops) {
+	hmLog("Parsing context props");
+	var dict = {};
+	let cps = cprops.split("\n");
+	for (var cpsi in cps) {
+		let cp = cps[cpsi].split("$");
+		if (cp.length != 2) continue;
+		dict[cp[0]] = [];
+		let propz = cp[1].split(";");
+		for (var propzi in propz) {
+			var cprop = propz[propzi].split("=");
+			if (cprop.length != 2) continue;
+			cprop = cprop[0] + "=\"" + cprop[1] + "\"";
+			hmLog("Adding '" + cprop + "' to " + cp[0]);
+			dict[cp[0]].push(cprop);
+		}
+	}
+	return dict;
 }
 
 //Better on nodes than on arcs (arcs should be O(N^2)) - Needed when filtering inline
@@ -253,90 +367,6 @@ function filterOut() {
 		//No current content type... Enrolling all nodes
 		graphItems = currentItems;
 	}
-}
-
-function prepareGraph() {
-	let items = graphItems;
-	setValidTargtes();
-
-	nodesAttributes = {};
-	hmLog('Vertex count: ' + items.length);
-
-	var nodes = [];
-	var arcs = [];
-
-	for (var eidx in items) {
-		let node = items[eidx];
-		var nodeProps = [`shape="box"`];
-
-		if (node.context_type && contextProps[node.context_type] != null) {
-			hmLog("Adding " + contextProps[node.context_type] + " as node props");
-			nodeProps = contextProps[node.context_type];
-		}
-
-		if (contextId_field != contextLabel_field) {
-			let nl = node.label == null ? "-" : node.label;
-			nodeProps.push(`label="${nl}"`);
-		}
-		nodes.push(`"${node["context_id"]}" [${nodeProps.join(",")}];`);
-		nodesAttributes[node["context_id"]] = { "id": node.id, "label": node.label, "text": node.description, "context_type": node.context_type }; //Could not figure out how to access images
-
-		if (node["stratigraphy"]) {
-			for (var cix in node["stratigraphy"]) {
-				let child = node["stratigraphy"][cix];
-				var relation = "";
-
-				if (child["other_context"] == null) continue;
-				let otherContextId = child["other_context"]["context_id"];
-				if (validTargets[otherContextId] == null) continue;
-
-				if (child["relationship"]) {
-					if (['fills', 'covers', 'cuts', 'leans against'].includes(child["relationship"])) {
-						relation = `"${node["context_id"]}" -> "${otherContextId}";`;
-					} else if (['is filled by', 'is covered by', 'is cut by', 'carries'].includes(child["relationship"])) {
-						relation = `"${otherContextId}" -> "${node["context_id"]}";`;
-					} else if (['is the same as', 'is bound to'].includes(child["relationship"])) {
-						relation = `"${otherContextId}" -> "${node["context_id"]}" [style="dashed", color="blue", dir="none"];`;
-					} else {
-						hmLog(`Not managed: ${child["relationship"]}`);
-					}
-				}
-
-				if (!arcs.includes(relation)) {
-					arcs.push(relation);
-				}
-			}
-		}
-	}
-
-	currentGraph = nodes.join("\n") + "\n" + arcs.join("\n");
-	//hmLog(currentGraph);
-}
-
-function hmLog(message) {
-	if (consoleLogging != true) return;
-	console.log("[HMLOG] - " + message);
-}
-
-function parseCProps(cprops) {
-	hmLog("Parsing context props");
-	var dict = {};
-	let cps = cprops.split("\n");
-	for (var cpsi in cps) {
-		let cp = cps[cpsi].split("$");
-		if (cp.length != 2) continue;
-		dict[cp[0]] = [];
-		let propz = cp[1].split(";");
-		for (var propzi in propz) {
-			var cprop = propz[propzi].split("=");
-			if (cprop.length != 2) continue;
-			cprop = cprop[0] + "=\"" + cprop[1] + "\"";
-			//hmLog("Adding '" + cprop + "' to " + cp[0]);
-			console.log("Adding '" + cprop + "' to " + cp[0]);
-			dict[cp[0]].push(cprop);
-		}
-	}
-	return dict;
 }
 
 
@@ -378,6 +408,10 @@ export default {
 			type: String,
 			default: null,
 		},
+		graphEngine: {
+			type: String,
+			default: "standard",
+		},
 		contextProps: String,
 		contextIdField: String,
 		contextLabelField: String,
@@ -393,8 +427,8 @@ export default {
 			immediate: true,
 			handler: function (newVal, oldVal) {
 				currentItems = mapItems(newVal);
-				filterOut(); //Filtering inline
-				prepareGraph();
+				filterOut();
+				buildGraph();
 				displayGraph();
 			}
 		},
@@ -412,20 +446,20 @@ export default {
 			hmLog("Context type is now: " + newVal);
 			currentContextType = newVal;
 			optFieldsChangedHandler("contextType", currentContextType, false);
-            filterOut(); //Filtering inline
-            prepareGraph();
+            filterOut();
+            buildGraph();
             displayGraph();
         },
         consoleLogging: function(newVal, oldVal) {
 			console.log("Console log: " + (newVal == true ? "ON" : "OFF"));
-            consoleLogging = newVal;
-			optFieldsChangedHandler("consoleLogging", consoleLogging, false);
+            setHmLogging(newVal);
+			optFieldsChangedHandler("consoleLogging", newVal, false);
         },
 		contextProps: function(newVal, oldVal) {
 			hmLog("Redoing context props");
 			optFieldsChangedHandler("contextProps", newVal, false);
 			contextProps = parseCProps(newVal);
-			prepareGraph();
+			buildGraph();
 			displayGraph();
 		},
 		filter: function (newVal, oldVal) {
@@ -448,6 +482,14 @@ export default {
 			contextType_field = newVal;
 			optFieldsChangedHandler("contextTypeField", contextType_field, true);
         },
+        graphEngine: function(newVal, oldVal) {
+			graphEngine = newVal;
+			optFieldsChangedHandler("graphEngine", graphEngine, false);
+			setEngine();
+			filterOut();
+            buildGraph();
+            displayGraph();
+        }
     },
     setup(props, context) {
 	    onMounted(() => {
@@ -475,8 +517,15 @@ export default {
 			// PERSISTENCE
 			currentSplines = props.spline;
 			currentConcentrated = props.currentConcentrated;
-			consoleLogging = props.consoleLogging;
 			currentContextType = props.contextType;
+			graphEngine = props.graphEngine;
+
+			console.log("Setting engine...");
+			setEngine();
+
+			let clState = props.consoleLogging == true ? "ON" : "OFF";
+			console.log(`Setting console logging: ${clState}`);
+			setHmLogging(props.consoleLogging);
 		});
 	},
 };
