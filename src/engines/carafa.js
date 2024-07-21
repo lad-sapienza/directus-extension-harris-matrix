@@ -74,14 +74,8 @@ const prepareGraph = function(graphItems, contextProps) {
         
         
 	}
-    
-    new CarafaGraph(jgf.graph);
-
-	//return {"graph": nodes.join("\n") + "\n" + arcs.join("\n"), "attributes": nodesAttributes};
-    return {"graph": "", "attributes": nodesAttributes};
+    const carafaGraph = new CarafaGraph(jgf.graph, contextProps["--ce-cluster"]);
+	return {"graph": carafaGraph.dot().join("\n"), "attributes": nodesAttributes};
 }
 
 module.exports = { engineVersion, prepareGraph, fetchDataPackage }
-
-
-//https://blaipratdesaba.com/how-to-use-an-npm-node-module-that-has-been-forked-b7dd522fdd08

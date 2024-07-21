@@ -1,12 +1,9 @@
 import { Graph, alg } from "@dagrejs/graphlib";
-//var graphlib = require("graphlib");
-
-//var Graph = graphlib.Graph;
 import HmLog from "../utils/hmlog.js";
-//var HmLog = require("../utils/hmlog.js");
 
-const CarafaGraph = function(jgf) {
+const CarafaGraph = function(jgf, clusterProperties) {
     
+    this.clusterProperties = clusterProperties;
     this.jfg = Object.assign({}, jgf); //Shallow copy is ok
     HmLog.hmLog("\n\n-------------------- PLAIN");
     HmLog.hmLog(JSON.stringify(this.jfg, null, 4));
@@ -39,18 +36,58 @@ const CarafaGraph = function(jgf) {
         cn_nodes[nodeId] = this.g.node(nodeId);
     }
     this.jfg.graph["nodes"] = cn_nodes;
-    
-    
     this.jfg.graph["edges"] = this.g.edges().map((x) => this.g.edge(x));
     
     
     HmLog.hmLog("\n\n-------------------- CLUSTERED");
     HmLog.hmLog(JSON.stringify(this.jfg, null, 4));
     
-    //https://www.cs.tufts.edu/comp/150FP/archive/al-aho/transitive-reduction.pdf
-    // Non la uso. Troppo complessa. Per ora mi accontento d O(
-    // TRED
+    // O(N + E) - It could be done inline [maybe later]
+    this.dot = function() {
+        var dot = [];
+        const dot_nodes = this.g.nodes();
+        for (var nix in dot_nodes) {
+            var nodeId = dot_nodes[nix];
+            var node = this.g.node(nodeId);
+            var nodeProps = [];
+            if (node["metadata"]) {
+                if (node["metadata"]["clustered"] == true && clusterProperties) {
+                    nodeProps = Object.assign([], clusterProperties);
+                } else {
+                    nodeProps = Object.assign([], node["metadata"]);
+                }
+                nodeProps.push(`label="${node["label"]}"`);
+            }
+            var nps = nodeProps.length == 0 ? "" : ` [${nodeProps.join(",")}]`;
+            dot.push(`"${nodeId}"${nps};`);
+        }
+        
+        dot.push("\n");
+        
+        const dot_edges = this.g.edges();
+        for (var eix in dot_edges) {
+            var dot_edge = dot_edges[eix];
+            var edge = this.g.edge(dot_edge);
+            var eLabel = "";
+            if(edge["label"]) eLabel = ` [${edge["label"]}]`;
+            dot.push(`"${edge["source"]}" -> "${edge["target"]}"${eLabel};`);
+        }
+        
+        return dot;
+    }
 }
+
+//"0" [shape="ellipse",tooltip="Layer",label="0"];
+//"us1" [shape="ellipse",tooltip="Layer",label="0",label="us1"];
+//"us2" [shape="invtrapezium",style="filled",color="red",fillcolor="white",tooltip="Cut",label="us2"];
+//"supehead_0" [shape="ellipse",tooltip="Layer",label="0",label="us1",label="supehead_0"];
+//"related" [shape="ellipse",tooltip="Layer",label="0",label="us1",label="supehead_0",label="related"];
+
+//"0" -> "us1";
+//"0" -> "us2";
+//"us2" -> "us1";
+//"supehead_0" -> "0";
+//"us2" -> "related" [style="dashed", color="blue", dir="none"];
 
 //O(E) + O(N)
 function clusteredGraph(nodes, edges, clustering_edges) {

@@ -1,8 +1,11 @@
 <template>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 	<div class="layout-harris-matrix">
 		<div v-if="!loading">
 			<div id="div-graph"></div>
-            <div id="download-button"><a id="download-anchor" download="hmdj.json">download hmdj</a></div>
+            <div id="download-button" onclick="downloadButtonHit();">
+                <a id="download-anchor" download="hmdj.json" title="download your hmdj file"><i class="fa-solid fa-download"></i></a>
+            </div>
 		</div>
 		<div id="info">
 			<h2>
@@ -76,8 +79,18 @@
 
 #download-button {
     top: 10px;
-    left: 10px;
+    left: calc(var(--content-padding) + 10px);
     position: absolute;
+    padding: 4px;
+    background-color: var(--v-button-background-color);
+    border-radius: 5px;
+    width: 2vw;
+    text-align: center;
+    cursor: pointer;
+}
+
+#download-button i {
+    color: white;
 }
 </style>
 

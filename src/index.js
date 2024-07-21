@@ -130,7 +130,10 @@ export default {
 
 cut$shape=invtrapezium;style=filled;color=red;fillcolor=white;tooltip=Cut
 		
-structure$shape=box;style=filled;fillcolor=#ebebeb;tooltip=Structure`;
+structure$shape=box;style=filled;fillcolor=#ebebeb;tooltip=Structure
+
+--ce-cluster$shape=doubleoctagon;style=filled;color=green;fillcolor=white;tooltip=Cluster
+`;
 		
 		const contextProps = getSessionOptField("contextProps", contextPropsDefault);
 		
