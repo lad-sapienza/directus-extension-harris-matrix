@@ -193,9 +193,14 @@ function clusteredGraph(nodes, edges, clustering_edges) {
 
 // TRED
 // This should take O(N * E)
-// Cycling on nodes, then applying a dfs search to determine if the edge is necessary or not
-// It uses a caching map to avoid redundant checks, which should reduce complexity form O(E * (N * E)) in most cases
-// ABSOLUTELY CHECK https://www.cs.tufts.edu/comp/150FP/archive/al-aho/transitive-reduction.pdf
+// It cycles on edges, then applyies a dfs search to determine if the current edge is necessary or not
+// It uses a caching map to avoid redundant checks, which should reduce complexity form O(E * (N + E)) to ~O(N * E) in most cases
+// The worst case (i.e no caching support + complete graph) should be calculated as follows:
+// -------
+// On a complete graph the number of edges is E = N(N−1)/2, then O(E * (N * E)) ->
+// O( (N(N-1)/2) * (N + (N(N-1)/2)) ) which leads to O(N^4). This - despite being purely theorethical - is absolutely unacceptable
+// ERGO NEXT VERSION SHOULD ABSOLUTELY BE DEVELOPED AFTRE CHECKING
+// Aho et al. -> https://www.cs.tufts.edu/comp/150FP/archive/al-aho/transitive-reduction.pdf
 function transitiveReduction(graph) {
     const reducedGraph = new Graph({ directed: true });
     
