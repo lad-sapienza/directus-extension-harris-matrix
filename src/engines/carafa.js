@@ -5,6 +5,7 @@ var jgf;
 
 const jgfConfig = {
     "context_id": "context_id",
+    "context_type": "context_type",
     "context_label": "label",
     "context_description": "description",
     "properties": {
@@ -29,7 +30,6 @@ const fetchDataPackage = function() {
 
 const prepareGraph = function(graphItems, contextProps) {
 	let items = graphItems;
-    var nodesAttributes = {};
     
     for (var pk in contextProps) {
         jgfConfig["properties"]["values"][pk] = contextProps[pk];
@@ -39,9 +39,6 @@ const prepareGraph = function(graphItems, contextProps) {
     
     for (var eidx in items) {
 		let node = items[eidx];
-		
-        nodesAttributes[node["context_id"]] = { "id": node.context_id, "label": node.label, "text": node.description, "context_type": node.context_type }; //Could not figure out how to access images
-        
         jgf.addNode(node);
 
         if (node["stratigraphy"]) {
@@ -75,7 +72,7 @@ const prepareGraph = function(graphItems, contextProps) {
         
 	}
     const carafaGraph = new CarafaGraph(jgf.graph, contextProps["--ce-cluster"]);
-	return {"graph": carafaGraph.dot().join("\n"), "attributes": nodesAttributes};
+	return {"graph": carafaGraph.dot().join("\n"), "attributes": carafaGraph.nodesAttributes()};
 }
 
 module.exports = { engineVersion, prepareGraph, fetchDataPackage }

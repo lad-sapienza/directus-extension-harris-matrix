@@ -37,7 +37,7 @@ const JGF = function(config) {
         return JSON.stringify(this.graph, null, 4);
     }
     
-    this.addNode = function(node, edges) {
+    this.addNode = function(node) {
         
         if(this.closed == true) {
             HmLog.hmLog("Graph is closed. Could not add node");
@@ -49,15 +49,25 @@ const JGF = function(config) {
         
         if (nodeIdKey in node) {
             let nodeId = `${node[nodeIdKey]}`;
-            this.graph.graph.nodes[nodeId] = { "metadata": {} }
+            this.graph.graph.nodes[nodeId] = {
+                "resource_id": node.id,
+                "metadata": {}
+            }
             
             if (config) {
                 var contextLabelKey = "label";
                 if ("context_label" in config) { contextLabelKey = config["context_label"]; }
                 if(node[contextLabelKey]) { this.graph.graph.nodes[nodeId]["label"] = node[contextLabelKey]; }
+                
+                //I also need the context type in metadata
+                var contextTypeKey = "context_type";
+                if ("context_type" in config) { contextTypeKey = config["context_type"]; }
+                if (node[contextTypeKey]) { this.graph.graph.nodes[nodeId]["context_type"] = node[contextTypeKey]; }
+
                 var contextDescKey = "description";
                 if ("context_description" in config) { contextDescKey = config["context_description"]; }
-                if (node[contextDescKey]) { nodeIdKey = this.graph.graph.nodes[nodeId]["metadata"]["description"] = node[contextDescKey]; }
+                if (node[contextDescKey]) { this.graph.graph.nodes[nodeId]["description"] = node[contextDescKey]; }
+                
                 if ("properties" in config) {
                     let propKey = config["properties"]["key"];
                     if(propKey in node) {
@@ -69,7 +79,7 @@ const JGF = function(config) {
                 }
                 
                 if ("map_data" in config && config["map_data"] == true) {
-                    this.graph.graph.nodes[nodeId]["metadata"]["description"]["data"] = node;
+                    this.graph.graph.nodes[nodeId]["data"] = node;
                 }
             }
         } else {

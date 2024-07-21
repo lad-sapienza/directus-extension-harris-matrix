@@ -3,9 +3,7 @@
 	<div class="layout-harris-matrix">
 		<div v-if="!loading">
 			<div id="div-graph"></div>
-            <div id="download-button" onclick="downloadButtonHit();">
-                <a id="download-anchor" download="hmdj.json" title="download your hmdj file"><i class="fa-solid fa-download"></i></a>
-            </div>
+            <a id="download-anchor" download="hmdj.json" title="download your hmdj file"><i class="fa-solid fa-download"></i></a>
 		</div>
 		<div id="info">
 			<h2>
@@ -15,7 +13,6 @@
 			</h2>
 			<div id="context_description"></div>
 			<div id="action_container">
-				<div id="view_record"></div>
 				<div><span id="info-close">Close</span></div>
 			</div>
 		</div>
@@ -77,7 +74,7 @@
 	cursor: pointer;
 }
 
-#download-button {
+#download-anchor {
     top: 10px;
     left: calc(var(--content-padding) + 10px);
     position: absolute;
@@ -89,7 +86,7 @@
     cursor: pointer;
 }
 
-#download-button i {
+#download-anchor i {
     color: white;
 }
 </style>
@@ -168,33 +165,26 @@ function buildGraph() {
 }
 
 function setDownloadButton() {
-    if (document.getElementById('download-button')) {
+    if (document.getElementById('download-anchor')) {
         if(fetchDataPackage) {
             var dataPackage = fetchDataPackage(false);
             hmLog("Data package:");
             hmLog(dataPackage);
+            
+            const m = new Date();
+            var dateString = m.getUTCFullYear() + "-" +
+                    ("0" + (m.getUTCMonth()+1)).slice(-2) + "-" +
+                    ("0" + m.getUTCDate()).slice(-2) + "-" +
+                    ("0" + m.getHours()).slice(-2) + "." +
+                    ("0" + m.getMinutes()).slice(-2) + "." +
+                    ("0" + m.getSeconds()).slice(-2);
+            
             var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(dataPackage);
             document.getElementById('download-anchor').href = dataStr;
-            document.getElementById('download-button').style.display = "block";
+            document.getElementById('download-anchor').download = `c_export-${dateString}.json`;
+            document.getElementById('download-anchor').style.display = "block";
         } else {
-            document.getElementById('download-button').style.display = "none";
-        }
-    }
-}
-
-function downloadDataPackage() {
-    if(fetchDataPackage) {
-        var dataPackage = fetchDataPackage(false);
-        if(dataPackage) {
-            var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(dataPackage);
-            var downloadAnchorNode = document.createElement('a');
-            downloadAnchorNode.setAttribute("href", dataStr);
-            downloadAnchorNode.setAttribute("download", "export.json");
-            document.body.appendChild(downloadAnchorNode); // required for firefox
-            downloadAnchorNode.click();
-            downloadAnchorNode.remove();
-        } else {
-            hmLog("Could not find something to export!");
+            document.getElementById('download-anchor').style.display = "none";
         }
     }
 }
@@ -256,7 +246,21 @@ function displayNodeInfos(node) {
 	let nid = node.querySelector('title').textContent;
 	let attrs = nodesAttributes[nid];
 
-	document.getElementById('view_record').innerHTML = `<a href="./content/${collection}/${attrs.id}" style="cursor: pointer;">View record</a>`;
+
+    if(document.getElementById('action_container')) {
+        document.querySelectorAll('.resource_linker').forEach(e => e.remove());
+        if (attrs.context_type == "cluster" && "clustered_metadata" in attrs) {
+            // TODO: Fix cluster visualization of linked resources
+            var cmks = Object.keys(attrs["clustered_metadata"]).reverse();
+            for (var cmk in cmks) {
+                let key = cmks[cmk];
+                let resource_id = attrs["clustered_metadata"][key]["resource_id"];
+                prependRecordLink(document.getElementById('action_container'), {"id": resource_id, "label": key});
+            }
+        } else {
+            prependRecordLink(document.getElementById('action_container'), {"id": attrs.resource_id});
+        }
+    }
 
 	document.getElementById('context_id').innerHTML = `${attrs.label}`;
 	document.getElementById('context_type').innerHTML = `${attrs.context_type}`;
@@ -266,6 +270,14 @@ function displayNodeInfos(node) {
 	if (svg) svg.style.opacity = 0.3;
 	if (document.getElementById('info')) document.getElementById('info').style.display = "block";
 
+}
+
+function prependRecordLink(to, attrs) {
+        let label = attrs.label == null ? "record" : attrs.label;
+        let div = document.createElement("div");
+        div.classList.add("resource_linker");
+        div.innerHTML = `<a href="./content/${collection}/${attrs.id}" style="cursor: pointer;">View ${label}</a>`;
+        to.prepend(div);
 }
 
 function addZoomPan() {

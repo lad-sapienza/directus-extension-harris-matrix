@@ -75,19 +75,29 @@ const CarafaGraph = function(jgf, clusterProperties) {
         
         return dot;
     }
+    
+    // O(N + E) - It could be done inline [maybe later]
+    this.nodesAttributes = function() {
+        var nodesAttributes = {};
+        const a_nodes = this.g.nodes();
+        for (var nix in a_nodes) {
+            var nodeId = a_nodes[nix];
+            var node = this.g.node(nodeId);
+            nodesAttributes[nodeId] = { "id": nodeId,
+                "label": node["label"],
+                "text": node["description"],
+                "context_type": node["context_type"],
+                "resource_id": node["resource_id"]
+            }; //Could not figure out how to access images
+            if (node["metadata"] && node["metadata"]["clustered"] == true) {
+                nodesAttributes[nodeId]["clustered_metadata"] = node["metadata"]["clustered_metadata"];
+            }
+        }
+        return nodesAttributes;
+    }
+    
 }
 
-//"0" [shape="ellipse",tooltip="Layer",label="0"];
-//"us1" [shape="ellipse",tooltip="Layer",label="0",label="us1"];
-//"us2" [shape="invtrapezium",style="filled",color="red",fillcolor="white",tooltip="Cut",label="us2"];
-//"supehead_0" [shape="ellipse",tooltip="Layer",label="0",label="us1",label="supehead_0"];
-//"related" [shape="ellipse",tooltip="Layer",label="0",label="us1",label="supehead_0",label="related"];
-
-//"0" -> "us1";
-//"0" -> "us2";
-//"us2" -> "us1";
-//"supehead_0" -> "0";
-//"us2" -> "related" [style="dashed", color="blue", dir="none"];
 
 //O(E) + O(N)
 function clusteredGraph(nodes, edges, clustering_edges) {
@@ -133,13 +143,16 @@ function clusteredGraph(nodes, edges, clustering_edges) {
                 var nodeId = component[cidx];
                 let node = nodes[nodeId];
                 clusterLabel += `${node["label"]}; `;
-                clustered_metadata[nodeId] = node["metadata"];
+                clustered_metadata[nodeId] = {"metadata": node["metadata"], "resource_id": node.resource_id};
                 edgesRedirect[nodeId] = clusterId;
                 HmLog.hmLog(`Adding node ${nodeId} to cluster ${clusterId}`);
             }
             
+            const cll = clusterLabel.trim();
             var cluster = {
-                "label": clusterLabel.trim(),
+                "label": cll,
+                "description": `Clustering node (${cll})`,
+                "context_type": "cluster",
                 "metadata": {
                     "clustered": true,
                     "clustered_metadata": clustered_metadata

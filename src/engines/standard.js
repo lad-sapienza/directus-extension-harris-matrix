@@ -33,7 +33,13 @@ const prepareGraph = function(graphItems, contextProps) {
 
         nodeProps.push(`label="${node.label}"`);
 		nodes.push(`"${node["context_id"]}" [${nodeProps.join(",")}];`);
-		nodesAttributes[node["context_id"]] = { "id": node.id, "label": node.label, "text": node.description, "context_type": node.context_type }; //Could not figure out how to access images
+        nodesAttributes[node["context_id"]] = {
+            "id": node.id,
+            "label": node.label,
+            "text": node.description,
+            "context_type": node.context_type,
+            "resource_id": node.id
+        }; //Could not figure out how to access images
 
 		if (node["stratigraphy"]) {
 			for (var cix in node["stratigraphy"]) {
