@@ -38,8 +38,10 @@ const CarafaGraph = function(jgf, clusterProperties) {
     const cg_nodes = this.g.nodes();
     for (var nix in cg_nodes) { //O(N)
         var nodeId = cg_nodes[nix];
-        cn_nodes[nodeId] = this.g.node(nodeId);
+        var cn_node = this.g.node(nodeId);
+        cn_nodes[nodeId] = {"label": cn_node["label"], "metadata": cn_node["metadata"]};
     }
+    this.jfg.graph["directed"] = true;
     this.jfg.graph["nodes"] = cn_nodes;
     this.jfg.graph["edges"] = this.g.edges().map((x) => this.g.edge(x));
     
@@ -59,7 +61,12 @@ const CarafaGraph = function(jgf, clusterProperties) {
                 if (node["metadata"]["clustered"] == true && clusterProperties) {
                     nodeProps = Object.assign([], clusterProperties);
                 } else {
-                    nodeProps = Object.assign([], node["metadata"]["properties"]);
+                    let cnp = node["metadata"]["properties"];
+                    if(cnp) {
+                        nodeProps = Object.assign([], cnp);
+                    } else {
+                        nodeProps = ["shape=\"box\""];
+                    }
                 }
                 nodeProps.push(`label="${node["label"]}"`);
             }
@@ -103,6 +110,19 @@ const CarafaGraph = function(jgf, clusterProperties) {
     
 }
 
+function fromGfgNode(node) {
+    var g_node = {
+        "label": node["label"],
+        "metadata": node["metadata"]
+    };
+    var c_infos = node["metadata"]["c_infos"];
+    if (c_infos) {
+        g_node["resource_id"] = c_infos["resource_id"];
+        g_node["context_type"] = c_infos["context_type"];
+        g_node["description"] = c_infos["description"];
+    }
+    return g_node;
+}
 
 //O(E) + O(N)
 function clusteredGraph(nodes, edges, clustering_edges) {
@@ -136,7 +156,7 @@ function clusteredGraph(nodes, edges, clustering_edges) {
         if (component.length == 1) {
             // Single node
             let nodeId = component[0];
-            let node = nodes[nodeId];
+            let node = fromGfgNode(nodes[nodeId]);
             clustered_g.setNode(nodeId, node);
         } else {
             let clusterId = `cluster_${clusterCounter}`;
@@ -146,9 +166,9 @@ function clusteredGraph(nodes, edges, clustering_edges) {
             var clusterLabel = "";
             for (var cidx in component) {
                 var nodeId = component[cidx];
-                let node = nodes[nodeId];
+                let node = fromGfgNode(nodes[nodeId]);
                 clusterLabel += `${node["label"]}; `;
-                clustered_metadata[nodeId] = {"metadata": node["metadata"], "resource_id": node.resource_id};
+                clustered_metadata[nodeId] = {"metadata": node["metadata"]};
                 edgesRedirect[nodeId] = clusterId;
                 HmLog.hmLog(`Adding node ${nodeId} to cluster ${clusterId}`);
             }
@@ -197,14 +217,14 @@ function clusteredGraph(nodes, edges, clustering_edges) {
 }
 
 // TRED
-// This should take O(N * E)
-// It cycles on edges, then applyies a dfs search to determine if the current edge is necessary or not
-// It uses a caching map to avoid redundant checks, which should reduce complexity form O(E * (N + E)) to ~O(N * E) in most cases
+// This should take O(N + E)
+// It cycles on edges, then applies a dfs search to determine if the current edge is necessary or not
+// It uses a caching map to avoid redundant checks, which should reduce complexity form O(E * (N + E)) to ~O(N + E) in most cases
 // The worst case (i.e no caching support + complete graph) should be calculated as follows:
 // -------
-// On a complete graph the number of edges is E = N(N−1)/2, then O(E * (N * E)) ->
-// O( (N(N-1)/2) * (N + (N(N-1)/2)) ) which leads to O(N^4). This - despite being purely theorethical - is absolutely unacceptable
-// ERGO NEXT VERSION SHOULD ABSOLUTELY BE DEVELOPED AFTRE CHECKING
+// On a complete graph the number of edges is E = N(N−1)/2, then O(E * (N + E)) ->
+// O( (N(N-1)/2) * (N + (N(N-1)/2)) ) which leads to O(N^4). This - despite being purely theoretical - is absolutely unacceptable
+// ERGO NEXT VERSION SHOULD ABSOLUTELY BE DEVELOPED AFTER CHECKING
 // Aho et al. -> https://www.cs.tufts.edu/comp/150FP/archive/al-aho/transitive-reduction.pdf
 function transitiveReduction(graph) {
     HmLog.hmLog("[TRED] - **************************** TRED");

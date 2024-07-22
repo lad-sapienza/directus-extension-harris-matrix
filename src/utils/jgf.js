@@ -60,8 +60,11 @@ const JGF = function(config) {
         if (nodeIdKey in node) {
             let nodeId = `${node[nodeIdKey]}`;
             this.graph.graph.nodes[nodeId] = {
-                "resource_id": node.id,
-                "metadata": {}
+                "metadata": {
+                    "c_infos": {
+                        "resource_id": node.id
+                    }
+                }
             }
             
             if (config) {
@@ -72,11 +75,11 @@ const JGF = function(config) {
                 //I also need the context type in metadata
                 var contextTypeKey = "context_type";
                 if ("context_type" in config) { contextTypeKey = config["context_type"]; }
-                if (node[contextTypeKey]) { this.graph.graph.nodes[nodeId]["context_type"] = node[contextTypeKey]; }
+                if (node[contextTypeKey]) { this.graph.graph.nodes[nodeId]["metadata"]["c_infos"]["context_type"] = node[contextTypeKey]; }
 
                 var contextDescKey = "description";
                 if ("context_description" in config) { contextDescKey = config["context_description"]; }
-                if (node[contextDescKey]) { this.graph.graph.nodes[nodeId]["description"] = node[contextDescKey]; }
+                if (node[contextDescKey]) { this.graph.graph.nodes[nodeId]["metadata"]["c_infos"]["description"] = node[contextDescKey]; }
                 
                 if ("properties" in config) {
                     let propKey = config["properties"]["key"];

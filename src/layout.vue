@@ -242,7 +242,6 @@ function mapStratigraphy(stratigraphyObject) {
 }
 
 function displayNodeInfos(node) {
-	hmLog("[NODE INFO: " + node + "]");
 	let nid = node.querySelector('title').textContent;
 	let attrs = nodesAttributes[nid];
 
@@ -254,7 +253,7 @@ function displayNodeInfos(node) {
             var cmks = Object.keys(attrs["clustered_metadata"]).reverse();
             for (var cmk in cmks) {
                 let key = cmks[cmk];
-                let resource_id = attrs["clustered_metadata"][key]["resource_id"];
+                let resource_id = attrs["clustered_metadata"][key]["metadata"]["c_infos"]["resource_id"];
                 prependRecordLink(document.getElementById('action_container'), {"id": resource_id, "label": key});
             }
         } else {
