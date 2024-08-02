@@ -99,7 +99,7 @@ if [[ "$RELEASE_MODE" != "J" ]]; then
         echo "-----------------------------------------------------------------------------------------------------"
         CHANGE_LINES_LOG="$CHANGE_LINES_LOG\n* $CHANGE_LINE\n"
     done
-
+    echo
     echo "Versioning time: $(date +"%H:%M")" >> "$RELEASE_CHL"
 
 fi
