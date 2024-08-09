@@ -137,7 +137,7 @@ function clusteredGraph(nodes, edges, clustering_edges) {
         result = iterator.next();
     }
     
-    for (var edgex in clustering_edges) { //O(N)
+    for (var edgex in clustering_edges) { //O(E)
         var edge = clustering_edges[edgex];
         tg.setEdge(edge["source"], edge["target"]);
     }
@@ -147,7 +147,7 @@ function clusteredGraph(nodes, edges, clustering_edges) {
     // O(E) [as per https://github.com/zmitry/graphlib/blob/master/README.md#alg-components]
     const components = alg.components(tg);
     
-    // THIS WILL CYCLE ON ALL THE NODES AND NO MORE, SO IT'S O(N)
+    // THIS WILL CYCLE ON ALL THE NODES (AT WORST) AND NO MORE, SO IT'S O(N)
     var clusterCounter = 0;
     var edgesRedirect = {};
     

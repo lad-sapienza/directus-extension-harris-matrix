@@ -156,7 +156,10 @@ function setEngine() {
 }
 
 function buildGraph() {
+    let now = new Date().getTime();
 	let graphElaboration = prepareGraph(graphItems, contextProps);
+    let elapsed = new Date().getTime() - now;
+    hmLog("Benchmark: " + graphItems.length + " items; " + elapsed + " ms;");
     if(graphElaboration) {
 		currentGraph = graphElaboration.graph;
 		nodesAttributes = graphElaboration.attributes;
