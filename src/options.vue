@@ -65,19 +65,19 @@ const graphEngineWritable = useSync(props, 'graphEngine', emit);
 	</div>
 	-->
 	<div class="field" id="hm-keyf">
-		<div class="type-label">US Key field</div>
+		<div class="type-label">Context ID field</div>
 		<v-select v-model="contextIdFieldWritable" :items="keyFields" />
 	</div>
 	<div class="field" id="hm-labellingf">
-		<div class="type-label">US Label field</div>
+		<div class="type-label">Context label field</div>
 		<v-select v-model="contextLabelFieldWritable" :items="labellingFields" />
 	</div>
 	<div class="field" id="hm-descf">
-		<div class="type-label">US Description field</div>
+		<div class="type-label">Context description field</div>
 		<v-select v-model="contentDescriptionFieldWritable" :items="descriptionFields" />
 	</div>
 	<div class="field" id="hm-conttf">
-		<div class="type-label">US Context type field</div>
+		<div class="type-label">Context type field</div>
 		<v-select v-model="contextTypeFieldWritable" :items="contextTypeFields" />
 	</div>
 	<div class="field">
