@@ -68,3 +68,8 @@ jobs:
           asset_path: ./dist.zip
           asset_name: directus-extension-harris-matrix.zip
           asset_content_type: application/zip
+          
+      - name: 📦 Publish NPM package
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
