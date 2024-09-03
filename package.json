@@ -1,12 +1,12 @@
 {
-  "name": "directus-extension-harris-matrix",
+  "name": "@lad-sapienza/directus-extension-harris-matrix",
   "description": "Please enter a description for your extension",
   "homepage": "https://github.com/lab-archeologia-digitale/directus-extension-harris-matrix",
   "bugs": {
     "url": "https://github.com/lab-archeologia-digitale/directus-extension-harris-matrix/issues"
   },
   "icon": "extension",
-  "version": "2.0.6",
+  "version": "2.0.7",
   "keywords": [
     "directus",
     "directus-extension",
@@ -39,6 +39,9 @@
     "source": "src/index.js",
     "host": "^10.1.11"
   },
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "directus-extension build",
     "buildnm": "directus-extension build --no-minify",
