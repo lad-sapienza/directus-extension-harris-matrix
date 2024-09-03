@@ -12,7 +12,7 @@ The [Harris matrix](https://en.wikipedia.org/wiki/Harris_matrix) is a tool used 
 
 ## How to model your database to record and display stratigraphy data
 
-[Here](https://caffeineandpizza.info/HMDE) you can find a very extensive tutorial on how to configure your directus collections to be rendered by the HMDE. Currently only in italian. We hope we'll be back with an english version ASAP
+[Here](https://youtu.be/yEDQMQqO87I) you can find a very extensive tutorial on how to configure your directus collections to be rendered by the HMDE. Currently only in italian. We hope we'll be back with an english version ASAP
 
 ## Credits
 
