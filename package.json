@@ -1,5 +1,5 @@
 {
-  "name": "directus-extension-harris-matrix",
+  "name": "@lad-sapienza/directus-extension-harris-matrix",
   "description": "Please enter a description for your extension",
   "homepage": "https://github.com/lab-archeologia-digitale/directus-extension-harris-matrix",
   "bugs": {
