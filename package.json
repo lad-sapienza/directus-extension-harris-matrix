@@ -39,6 +39,9 @@
     "source": "src/index.js",
     "host": "^10.1.11"
   },
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "directus-extension build",
     "buildnm": "directus-extension build --no-minify",
