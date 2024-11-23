@@ -7,6 +7,7 @@ authors:
   - family-names: Santoro
     given-names: Domenico
 title: "HDME: HArris Matrix Directus Extension"
-version: 2.0.12
+version: 2.0.14
+doi: 10.5281/zenodo.14208128
 date-released: 2024-11-23
 license: "AGPL-3.0"
