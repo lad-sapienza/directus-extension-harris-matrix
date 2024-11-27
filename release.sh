@@ -162,7 +162,7 @@ echo "$NEXT_VERSION" > "$RELEASE_VER"
 
 echo ""
 echo "Committing..."
-git commit -am "Versioning to $NEXT_VERSION"
+git commit -a --allow-empty-message -m "Versioning to $NEXT_VERSION"
 echo ""
 echo "Pushing to develop..."
 git push origin "$CURRENT_BRANCH"
