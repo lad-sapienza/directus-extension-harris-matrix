@@ -100,7 +100,7 @@ if [[ "$RELEASE_MODE" != "J" ]]; then
         CHANGE_LINES_LOG="$CHANGE_LINES_LOG\n* $CHANGE_LINE\n"
     done
     echo
-    echo "Versioning time: $(date +"%H:%M")" >> "$RELEASE_CHL"
+    echo "\nVersioning time: $(date +"%H:%M")" >> "$RELEASE_CHL"
 
 fi
 
@@ -144,6 +144,19 @@ if [[ "$USE_JQ" != "N" ]]; then
     JQP=$(jq ".version = \"$NEXT_VERSION_NUM\"" package.json)
     echo "$JQP" > package.json
 fi
+
+V_CITATION=""
+while IFS= read -r line || [[ -n $line ]]; do
+    if [[ "$line" == "version:"* ]]; then
+        V_CITATION="${V_CITATION}version: ${NEXT_VERSION_NUM}\n"
+    elif [[ "$line" == "date-released:"* ]]; then
+        V_CITATION="${V_CITATION}date-released: $(date +"%Y-%m-%d")\n"
+    else
+        V_CITATION="${V_CITATION}${line}\n"
+    fi
+done < CITATION.cff
+V_CITATION=$(echo "$V_CITATION" | sed 's/\n$//')
+echo "$V_CITATION" > CITATION.cff
 
 echo "$NEXT_VERSION" > "$RELEASE_VER"
 
