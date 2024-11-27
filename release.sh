@@ -162,14 +162,14 @@ echo "$NEXT_VERSION" > "$RELEASE_VER"
 
 echo ""
 echo "Committing..."
-git commit -a --allow-empty-message -m "Versioning to $NEXT_VERSION"
+git commit -am "Versioning to $NEXT_VERSION"
 echo ""
 echo "Pushing to develop..."
 git push origin "$CURRENT_BRANCH"
 
 echo "Merging develop -> main..."
 git checkout main
-git merge develop
+git merge develop -m "Versioning to $NEXT_VERSION"
 git push
 git checkout develop
 
