@@ -1,12 +1,12 @@
 {
   "name": "@lad-sapienza/directus-extension-harris-matrix",
   "description": "Please enter a description for your extension",
-  "homepage": "https://github.com/lab-archeologia-digitale/directus-extension-harris-matrix",
+  "homepage": "https://github.com/lad-sapienza/directus-extension-harris-matrix",
   "bugs": {
-    "url": "https://github.com/lab-archeologia-digitale/directus-extension-harris-matrix/issues"
+    "url": "https://github.com/lad-sapienza/directus-extension-harris-matrix/issues"
   },
   "icon": "extension",
-  "version": "2.0.20",
+  "version": "2.0.21",
   "keywords": [
     "directus",
     "directus-extension",
@@ -20,7 +20,7 @@
   "license": "AGPL-3.0",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/lab-archeologia-digitale/directus-extension-harris-matrix.git"
+    "url": "git+https://github.com/lad-sapienza/directus-extension-harris-matrix.git"
   },
   "author": {
     "name": "Domenico Santoro",
