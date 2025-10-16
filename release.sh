@@ -19,7 +19,7 @@ if [[ "$USE_JQ" == "N" ]]; then
     echo "******************************************************"
     echo ""
     echo "- (e)xit and install jq"
-    echo "- (c)ontinue: i've manually modified pacakge.json"
+    echo "- (c)ontinue: I've manually modified package.json"
     echo ""
     echo "Your choice (e):"
     read USE_JQ_IPT
@@ -97,10 +97,10 @@ if [[ "$RELEASE_MODE" != "J" ]]; then
         fi
         echo "- $CHANGE_LINE" >> "$RELEASE_CHL"
         echo "-----------------------------------------------------------------------------------------------------"
-        CHANGE_LINES_LOG="$CHANGE_LINES_LOG\n* $CHANGE_LINE\n"
+        CHANGE_LINES_LOG="${CHANGE_LINES_LOG}* ${CHANGE_LINE}\n"
     done
     echo
-    echo "\nVersioning time: $(date +"%H:%M")" >> "$RELEASE_CHL"
+    echo -e "\nVersioning time: $(date +"%H:%M")" >> "$RELEASE_CHL"
 
 fi
 
@@ -111,7 +111,7 @@ echo "Current version: $CURRENT_VERSION"
 if [[ "$RELEASE_MODE" != "J" ]]; then
     echo "Next version: $NEXT_VERSION"
     echo "Changes in this version ------------------------------------------------------------------------------------"
-    echo "$CHANGE_LINES_LOG"
+    echo -e "$CHANGE_LINES_LOG"
 fi
 echo "************************************************************************************************************"
 
@@ -154,16 +154,22 @@ echo "$NEXT_VERSION" > "$RELEASE_VER"
 
 echo ""
 echo "Committing..."
-git commit -am "Versioning to $NEXT_VERSION"
+git commit -am "Versioning to $NEXT_VERSION" || { echo "Error: Git commit failed"; exit 1; }
+
 echo ""
 echo "Pushing to develop..."
-git push origin "$CURRENT_BRANCH"
+git push origin "$CURRENT_BRANCH" || { echo "Error: Failed to push to develop"; exit 1; }
 
 echo "Merging develop -> main..."
-git checkout main
-git merge develop -m "Versioning to $NEXT_VERSION"
-git push
-git checkout develop
+git checkout main || { echo "Error: Failed to checkout main"; exit 1; }
+git merge develop -m "Versioning to $NEXT_VERSION" || { echo "Error: Merge failed - resolve conflicts manually"; exit 1; }
+git push || { echo "Error: Failed to push to main"; exit 1; }
+
+echo "Creating git tag $NEXT_VERSION..."
+git tag -a "$NEXT_VERSION" -m "Release $NEXT_VERSION" || { echo "Warning: Failed to create tag"; }
+git push origin "$NEXT_VERSION" || { echo "Warning: Failed to push tag"; }
+
+git checkout develop || { echo "Error: Failed to checkout develop"; exit 1; }
 
 echo ""
 echo "Done!"
