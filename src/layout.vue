@@ -1,9 +1,8 @@
 <template>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 	<div class="layout-harris-matrix">
 		<div v-if="!loading">
 			<div id="div-graph"></div>
-            <a id="download-anchor" download="hmdj.json" title="download your hmdj file"><i class="fa-solid fa-download"></i></a>
+            <a id="download-anchor" download="hmdj.json" title="Download JGF file">⬇</a>
 		</div>
 		<div id="info">
 			<h2>
@@ -75,19 +74,30 @@
 }
 
 #download-anchor {
-    top: 10px;
-    left: calc(var(--content-padding) + 10px);
+    display: none !important;
     position: absolute;
-    padding: 4px;
-    background-color: var(--v-button-background-color);
+    top: 10px;
+    left: 10px;
+    padding: 8px 12px;
+    background-color: var(--theme--primary);
+    color: white;
     border-radius: 5px;
-    width: 2vw;
+    min-width: 40px;
     text-align: center;
     cursor: pointer;
+    z-index: 100;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    text-decoration: none;
+    font-size: 20px;
+    line-height: 1;
 }
 
-#download-anchor i {
-    color: white;
+#download-anchor.show {
+    display: block !important;
+}
+
+#download-anchor:hover {
+    background-color: var(--theme--primary-accent);
 }
 </style>
 
@@ -95,12 +105,9 @@
 // https://github.com/codihaus/directus-extension-grid-layout/blob/main/src/options.vue
 
 import { onMounted } from 'vue';
-import { toRefs, toRef } from 'vue';
 import { instance } from "@viz-js/viz";
-import { useItems, useCollection, useSync } from '@directus/extensions-sdk';
-import { useApi, useStores } from '@directus/extensions-sdk';
 import svgPanZoom from "svg-pan-zoom";
-import { getCurrentInstance } from 'vue';
+import { useRouter } from 'vue-router';
 
 import { setHmLogging,  hmLog } from './utils/hmlog.js';
 
@@ -126,9 +133,6 @@ var contentDescriptionField = "";
 var contextTypeField = "";
 
 var pkField = "";
-
-let toogleInfo = false;
-
 
 var graphEngine = "standard";
 
@@ -170,27 +174,41 @@ function buildGraph() {
 }
 
 function setDownloadButton() {
-    if (document.getElementById('download-anchor')) {
+    hmLog("setDownloadButton called");
+    const anchor = document.getElementById('download-anchor');
+    hmLog("anchor element: " + (anchor ? "FOUND" : "NOT FOUND"));
+    hmLog("fetchDataPackage: " + (fetchDataPackage ? "EXISTS (type: " + typeof fetchDataPackage + ")" : "NULL"));
+    
+    if (anchor) {
         if(fetchDataPackage) {
-            var dataPackage = fetchDataPackage(false);
-            hmLog("Data package:");
-            hmLog(dataPackage);
-            
-            const m = new Date();
-            var dateString = m.getUTCFullYear() + "-" +
-                    ("0" + (m.getUTCMonth()+1)).slice(-2) + "-" +
-                    ("0" + m.getUTCDate()).slice(-2) + "-" +
-                    ("0" + m.getHours()).slice(-2) + "." +
-                    ("0" + m.getMinutes()).slice(-2) + "." +
-                    ("0" + m.getSeconds()).slice(-2);
-            
-            var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(dataPackage);
-            document.getElementById('download-anchor').href = dataStr;
-            document.getElementById('download-anchor').download = `c_export-${dateString}.json`;
-            document.getElementById('download-anchor').style.display = "block";
+            hmLog("Calling fetchDataPackage...");
+            try {
+                var dataPackage = fetchDataPackage(false);
+                hmLog("Data package length: " + (dataPackage ? dataPackage.length : "null"));
+                
+                const m = new Date();
+                var dateString = m.getUTCFullYear() + "-" +
+                        ("0" + (m.getUTCMonth()+1)).slice(-2) + "-" +
+                        ("0" + m.getUTCDate()).slice(-2) + "-" +
+                        ("0" + m.getHours()).slice(-2) + "." +
+                        ("0" + m.getMinutes()).slice(-2) + "." +
+                        ("0" + m.getSeconds()).slice(-2);
+                
+                var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(dataPackage);
+                anchor.href = dataStr;
+                anchor.download = `c_export-${dateString}.json`;
+                anchor.classList.add('show');
+                hmLog("Download button SHOWN (class 'show' added)");
+            } catch (error) {
+                hmLog("ERROR in fetchDataPackage: " + error.message);
+                anchor.classList.remove('show');
+            }
         } else {
-            document.getElementById('download-anchor').style.display = "none";
+            anchor.classList.remove('show');
+            hmLog("Download button HIDDEN (no fetchDataPackage)");
         }
+    } else {
+        hmLog("ERROR: anchor element NOT found in DOM");
     }
 }
 
@@ -280,7 +298,16 @@ function prependRecordLink(to, attrs) {
         let label = attrs.label == null ? "record" : attrs.label;
         let div = document.createElement("div");
         div.classList.add("resource_linker");
-        div.innerHTML = `<a href="./content/${collection}/${attrs.id}" style="cursor: pointer;">View ${label}</a>`;
+        div.style.cursor = "pointer";
+        div.style.color = "var(--theme--primary)";
+        div.style.textDecoration = "underline";
+        div.textContent = `View ${label}`;
+        div.addEventListener('click', function() {
+            closeInfo();
+            if (window._directusRouter) {
+                window._directusRouter.push(`/content/${collection}/${attrs.id}`);
+            }
+        });
         to.prepend(div);
 }
 
@@ -492,6 +519,11 @@ export default {
         }
     },
     setup(props, context) {
+		const router = useRouter();
+		
+		// Make router available globally for prependRecordLink function
+		window._directusRouter = router;
+		
 	    onMounted(() => {
 			refreshHandler = props.refresh;
 			optFieldsChangedHandler = props.optFieldsChanged;
