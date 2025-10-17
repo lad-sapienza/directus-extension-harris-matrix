@@ -19,9 +19,6 @@ export default {
     const name = ref("Harris Matrix");
 
 		const selection = useSync(props, 'selection', emit);
-        // const layoutOptions = useSync(props, 'layoutOptions', emit);
-		// console.log(layoutOptions);
-		
 		
 		const keyFields = computed(() => {
 			var fields = [];
@@ -190,17 +187,9 @@ structure$shape=box;style=filled;fillcolor=#ebebeb;tooltip=Structure
 			return defaultValue;
 		}
 		
-		function optFieldsChanged(field, value, refreshItems) {
-			sessionStorage.setItem(`${collection}_${field}_store`, value);
-			if (refreshItems == true) refresh();
-		}
-		
-		/*function queryFieldsChanged(contextIdField, contextLabelField, contentDescriptionField, contextTypeField) {
-			sessionStorage.setItem(`${collection}_contextIdField_store`, contextIdField);
-			sessionStorage.setItem(`${collection}_contextLabelField_store`, contextLabelField);			
-			sessionStorage.setItem(`${collection}_contentDescriptionField_store`, contentDescriptionField);
-			sessionStorage.setItem(`${collection}_contextTypeField_store`, contextTypeField);
-			getItems();
-		}*/
-	},
+	function optFieldsChanged(field, value, refreshItems) {
+		sessionStorage.setItem(`${collection}_${field}_store`, value);
+		if (refreshItems == true) refresh();
+	}
+},
 };

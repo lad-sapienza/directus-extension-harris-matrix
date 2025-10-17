@@ -4,9 +4,21 @@ const engineVersion = function() {
 	return "Standard engine *** v0.1 ***";
 }
 
+// Stratigraphic relationship type constants
+const RELATIONSHIP_TYPES = {
+	ABOVE: ['fills', 'covers', 'cuts', 'leans against'],
+	BELOW: ['is filled by', 'is covered by', 'is cut by', 'carries'],
+	CONTEMPORARY: ['is the same as', 'is bound to']
+};
+
 var nodesAttributes = {};
 
-
+/**
+ * Prepares a GraphViz DOT format graph from archaeological context items
+ * @param {Array<Object>} graphItems - Array of context objects with stratigraphy data
+ * @param {Object} contextProps - Visual properties for each context type (shapes, colors, etc.)
+ * @returns {{graph: string, attributes: Object}} DOT format graph string and node attributes
+ */
 const prepareGraph = function(graphItems, contextProps) {
 	let items = graphItems;
     nodesAttributes = {}
@@ -81,13 +93,13 @@ const prepareGraph = function(graphItems, contextProps) {
                     continue;
                 }
 
-                if (['fills', 'covers', 'cuts', 'leans against'].includes(rel)) {
+                if (RELATIONSHIP_TYPES.ABOVE.includes(rel)) {
                     relation = `"${node["context_id"]}" -> "${otherContextId}";`;
                     nodesRegister[node["context_id"]] = reg;
-                } else if (['is filled by', 'is covered by', 'is cut by', 'carries'].includes(rel)) {
+                } else if (RELATIONSHIP_TYPES.BELOW.includes(rel)) {
                     relation = `"${otherContextId}" -> "${node["context_id"]}";`;
                     nodesRegister[node["context_id"]] = reg;
-                } else if (['is the same as', 'is bound to'].includes(rel)) {
+                } else if (RELATIONSHIP_TYPES.CONTEMPORARY.includes(rel)) {
                     let subRelation = `"${otherContextId}" -> "${node["context_id"]}" [style="dashed", color="blue", dir="none"];`;
                     var sg = subGraphsSubscriptions[otherContextId];
                     if (sg) {
