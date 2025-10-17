@@ -1,3 +1,3 @@
-- refactor: extract relationship type constants, add JSDoc comments, fix snake_case naming, remove dead code
+- Updated directus compatibility version
 -e 
-Versioning time: 12:19
+Versioning time: 13:35
