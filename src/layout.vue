@@ -112,7 +112,6 @@ var currentItems = [];
 var graphItems = [];
 var currentGraph = null;
 var currentSplines = 'ortho';
-var currentConcentrated = false;
 var currentContextType = null;
 var nodesAttributes = {};
 var contextProps = {};
@@ -312,9 +311,14 @@ function displayGraph() {
 			item.removeChild(item.firstChild)
 		}
 		if (currentGraph) {
-			let digraph = `digraph { splines=${currentSplines}; concentrated=${currentConcentrated}; ${currentGraph} }`;
+			let digraph = `digraph { splines=${currentSplines}; ${currentGraph} }`;
 			hmLog("DIGRAPH V2 length: " + digraph.length + "\n" + digraph);
-			let svg = viz.renderSVGElement(digraph);
+			
+			// Apply transitive reduction only for Carafa engine
+			// Standard engine shows all relationships without reduction
+			const renderOptions = graphEngine === "carafa" ? { reduce: true } : {};
+			
+			let svg = viz.renderSVGElement(digraph, renderOptions);
 			item.appendChild(svg);
 			[].forEach.call(document.querySelectorAll('g.node'), el => {
 				el.addEventListener('click', function () {
@@ -397,10 +401,6 @@ export default {
 			type: String,
 			default: 'ortho',
 		},
-		concentrated: {
-			type: Boolean,
-			default: false,
-		},
 		consoleLogging: {
 			type: Boolean,
 			default: false,
@@ -440,11 +440,6 @@ export default {
         spline: function(newVal, oldVal) {
             currentSplines = newVal;
 			optFieldsChangedHandler("spline", currentSplines, false);
-            displayGraph();
-        },
-        concentrated: function(newVal, oldVal) {
-            currentConcentrated = newVal;
-			optFieldsChangedHandler("concentrated", currentConcentrated, false);
             displayGraph();
         },
         contextType: function(newVal, oldVal) {
@@ -521,7 +516,6 @@ export default {
 			
 			// PERSISTENCE
 			currentSplines = props.spline;
-			currentConcentrated = props.currentConcentrated;
 			currentContextType = props.contextType;
 			graphEngine = props.graphEngine;
 

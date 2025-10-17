@@ -32,7 +32,9 @@ const CarafaGraph = function(jgf, clusterProperties) {
         throw raise;
     }
     
-    this.g = transitiveReduction(c_graph);
+    // Use clustered graph directly without custom transitive reduction
+    // viz.js will handle transitive reduction via its built-in reduce option
+    this.g = c_graph;
     
     var cn_nodes = {};
     const cg_nodes = this.g.nodes();
