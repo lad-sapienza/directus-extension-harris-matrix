@@ -136,15 +136,14 @@ structure$shape=box;style=filled;fillcolor=#ebebeb;tooltip=Structure
 		const contextProps = getSessionOptField("contextProps", contextPropsDefault);
 		
 							 
-		const spline = getSessionOptField("spline", 'Ortho');
-    const concentrated = getSessionOptField("concentrated", false) == "true";
+	const spline = getSessionOptField("spline", 'Ortho');
+    const concentrated = getSessionOptField("concentrated", true) == "true";
     const contextType = getSessionOptField("contextType", null);
-		const consoleLogging = getSessionOptField("consoleLogging", false) == "true";
-		const primaryKeyFieldKey = primaryKeyField.value.field;
+	const consoleLogging = getSessionOptField("consoleLogging", false) == "true";
+	const primaryKeyFieldKey = primaryKeyField.value.field;
 
-		const graphEngine = getSessionOptField("graphEngine", "standard");
-		
-		return { 
+	// Default to Carafa engine (simplified mode ON by default)
+	const graphEngine = getSessionOptField("graphEngine", "carafa");		return { 
             name,
             info,
             primaryKeyField,

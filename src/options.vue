@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { computed } from 'vue';
 import { useSync } from '@directus/composables';
 import { Field } from '@directus/types';
 
@@ -50,7 +51,11 @@ const contextLabelFieldWritable = useSync(props, 'contextLabelField', emit);
 const contentDescriptionFieldWritable = useSync(props, 'contentDescriptionField', emit);
 const contextTypeFieldWritable = useSync(props, 'contextTypeField', emit);
 
-const graphEngineWritable = useSync(props, 'graphEngine', emit);
+// Convert engine selection to simplified checkbox (true = carafa, false = standard)
+const graphSimplificationWritable = computed({
+	get: () => props.graphEngine === 'carafa',
+	set: (value: boolean) => emit('update:graphEngine', value ? 'carafa' : 'standard')
+});
 
 </script>
 
@@ -79,6 +84,18 @@ const graphEngineWritable = useSync(props, 'graphEngine', emit);
 	<div class="field" id="hm-conttf">
 		<div class="type-label">Context type field</div>
 		<v-select v-model="contextTypeFieldWritable" :items="contextTypeFields" />
+	</div>
+	<div class="field">
+		<div class="type-label">Simplified graph</div>
+		<v-checkbox v-model="graphSimplificationWritable" label="Apply transitive reduction and clustering (Carafa algorithm)" class="block"></v-checkbox>
+	</div>
+	<div class="field">
+		<div class="type-label">Edge bundling</div>
+		<v-checkbox v-model="concentratedWritable" label="Merge parallel edges to reduce clutter (concentrated mode)" class="block"></v-checkbox>
+	</div>
+	<div class="field" id="hm-cprops">
+		<div class="type-label">Context Properties</div>
+		<v-textarea v-model="contextPropsWritable"></v-textarea>
 	</div>
 	<div class="field">
 		<div class="type-label">Spline</div>
@@ -110,29 +127,8 @@ const graphEngineWritable = useSync(props, 'graphEngine', emit);
 		]" />
 	</div>
 	<div class="field">
-		<div class="type-label">Concentrated</div>
-		<v-checkbox v-model="concentratedWritable" label="Concentred graph mode" class="block"></v-checkbox>
-	</div>
-	<div class="field" id="hm-cprops">
-		<div class="type-label">Context Properties</div>
-		<v-textarea v-model="contextPropsWritable"></v-textarea>
-	</div>
-	<div class="field">
-		<div class="type-label">Console logging</div>
-		<v-checkbox v-model="consoleLoggingWritable" label="Console logging" class="block"></v-checkbox>
-	</div>
-	<div class="field">
-		<div class="type-label">Engine</div>
-		<v-select v-model="graphEngineWritable" :items="[
-			{
-				text: 'Standard',
-				value: 'standard',
-			},
-			{
-				text: 'Simplified',
-				value: 'carafa',
-			},
-		]" />
+		<div class="type-label">Debug</div>
+		<v-checkbox v-model="consoleLoggingWritable" label="Turn on console logging" class="block"></v-checkbox>
 	</div>
 </template>
 
