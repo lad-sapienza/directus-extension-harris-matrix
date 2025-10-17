@@ -1,3 +1,3 @@
-- Updated directus compatibility version
+- chore: update dependencies (graphlib, viz-js, sass, svg-pan-zoom)
 -e 
-Versioning time: 13:35
+Versioning time: 13:42
