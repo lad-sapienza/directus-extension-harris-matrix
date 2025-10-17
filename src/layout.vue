@@ -2,7 +2,8 @@
 	<div class="layout-harris-matrix">
 		<div v-if="!loading">
 			<div id="div-graph"></div>
-            <a id="download-anchor" download="hmdj.json" title="Download JGF file">⬇</a>
+            <a id="download-anchor" download="hmdj.json" title="Download JGF file">⬇ JSON</a>
+            <button id="download-png" title="Download graph as PNG">⬇ PNG</button>
 		</div>
 		<div id="info">
 			<h2>
@@ -77,19 +78,19 @@
     display: none !important;
     position: absolute;
     top: 10px;
-    left: 10px;
-    padding: 8px 12px;
+    left: 40px;
+    padding: 6px 10px;
     background-color: var(--theme--primary);
     color: white;
     border-radius: 5px;
-    min-width: 40px;
     text-align: center;
     cursor: pointer;
     z-index: 100;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
     text-decoration: none;
-    font-size: 20px;
-    line-height: 1;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.2;
 }
 
 #download-anchor.show {
@@ -97,6 +98,33 @@
 }
 
 #download-anchor:hover {
+    background-color: var(--theme--primary-accent);
+}
+
+#download-png {
+    display: none;
+    position: absolute;
+    top: 10px;
+    left: 120px;
+    padding: 6px 10px;
+    background-color: var(--theme--primary);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    text-align: center;
+    cursor: pointer;
+    z-index: 100;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.2;
+}
+
+#download-png.show {
+    display: block !important;
+}
+
+#download-png:hover {
     background-color: var(--theme--primary-accent);
 }
 </style>
@@ -176,7 +204,9 @@ function buildGraph() {
 function setDownloadButton() {
     hmLog("setDownloadButton called");
     const anchor = document.getElementById('download-anchor');
+    const pngButton = document.getElementById('download-png');
     hmLog("anchor element: " + (anchor ? "FOUND" : "NOT FOUND"));
+    hmLog("PNG button element: " + (pngButton ? "FOUND" : "NOT FOUND"));
     hmLog("fetchDataPackage: " + (fetchDataPackage ? "EXISTS (type: " + typeof fetchDataPackage + ")" : "NULL"));
     
     if (anchor) {
@@ -209,6 +239,105 @@ function setDownloadButton() {
         }
     } else {
         hmLog("ERROR: anchor element NOT found in DOM");
+    }
+    
+    // PNG button is always visible when there's a graph
+    if (pngButton && currentGraph) {
+        pngButton.classList.add('show');
+        hmLog("PNG download button SHOWN");
+    } else if (pngButton) {
+        pngButton.classList.remove('show');
+        hmLog("PNG download button HIDDEN (no graph)");
+    }
+}
+
+function downloadGraphAsPNG() {
+    hmLog("downloadGraphAsPNG called");
+    const svgOriginal = document.querySelector("#div-graph svg");
+    if (!svgOriginal) {
+        hmLog("ERROR: No SVG found");
+        return;
+    }
+    
+    try {
+        // Clone the SVG to avoid modifying the original
+        const svg = svgOriginal.cloneNode(true);
+        
+        // Remove pan-zoom controls from the clone
+        const controls = svg.querySelector('#svg-pan-zoom-controls');
+        if (controls) {
+            controls.remove();
+            hmLog("Pan-zoom controls removed from export");
+        }
+        
+        // Get the bounding box of all content
+        const bbox = svgOriginal.getBBox();
+        const padding = 20;
+        
+        // Calculate dimensions including all content
+        const width = Math.ceil(bbox.x + bbox.width + padding);
+        const height = Math.ceil(bbox.y + bbox.height + padding);
+        
+        hmLog("BBox: x=" + bbox.x + ", y=" + bbox.y + ", width=" + bbox.width + ", height=" + bbox.height);
+        hmLog("Canvas dimensions: " + width + "x" + height);
+        
+        // Set explicit dimensions on the cloned SVG
+        svg.setAttribute('width', width);
+        svg.setAttribute('height', height);
+        svg.setAttribute('viewBox', '0 0 ' + width + ' ' + height);
+        
+        // Create a canvas with scale factor for better quality
+        const scale = 2;
+        const canvas = document.createElement('canvas');
+        canvas.width = width * scale;
+        canvas.height = height * scale;
+        const ctx = canvas.getContext('2d');
+        ctx.scale(scale, scale);
+        
+        // Set white background
+        ctx.fillStyle = 'white';
+        ctx.fillRect(0, 0, width, height);
+        
+        // Serialize SVG to string
+        const serializer = new XMLSerializer();
+        let svgString = serializer.serializeToString(svg);
+        
+        // Create blob and image
+        const blob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        
+        const img = new Image();
+        img.onload = function() {
+            ctx.drawImage(img, 0, 0);
+            URL.revokeObjectURL(url);
+            
+            // Convert canvas to PNG and download
+            canvas.toBlob(function(blob) {
+                const m = new Date();
+                const dateString = m.getUTCFullYear() + "-" +
+                        ("0" + (m.getUTCMonth()+1)).slice(-2) + "-" +
+                        ("0" + m.getUTCDate()).slice(-2) + "-" +
+                        ("0" + m.getHours()).slice(-2) + "." +
+                        ("0" + m.getMinutes()).slice(-2) + "." +
+                        ("0" + m.getSeconds()).slice(-2);
+                
+                const downloadUrl = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = downloadUrl;
+                a.download = `harris_matrix-${dateString}.png`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(downloadUrl);
+                hmLog("PNG download completed");
+            });
+        };
+        img.onerror = function(error) {
+            hmLog("ERROR loading SVG image: " + error);
+        };
+        img.src = url;
+    } catch (error) {
+        hmLog("ERROR in downloadGraphAsPNG: " + error.message);
     }
 }
 
@@ -544,6 +673,10 @@ export default {
 			
 			if (document.getElementById('info-close')) document.getElementById('info-close').addEventListener('click', function() {
 		        closeInfo();
+		    });
+			
+			if (document.getElementById('download-png')) document.getElementById('download-png').addEventListener('click', function() {
+		        downloadGraphAsPNG();
 		    });
 			
 			// PERSISTENCE
