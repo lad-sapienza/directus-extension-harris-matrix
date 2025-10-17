@@ -121,12 +121,12 @@ var refreshHandler = null;
 var optFieldsChangedHandler = null;
 
 // FIELDS
-var contextId_field = "";
-var contextLabel_field = "";
-var contentDescription_field = "";
-var contextType_field = "";
+var contextIdField = "";
+var contextLabelField = "";
+var contentDescriptionField = "";
+var contextTypeField = "";
 
-var pk_field = "";
+var pkField = "";
 
 let toogleInfo = false;
 
@@ -213,15 +213,15 @@ function mapItems(items) {
 	for (var ix in items) {
 		let item = items[ix];
 		let nitem = {
-			"id": item[pk_field],
-			"context_id": item[contextId_field],
-			"label": item[contextLabel_field],
-			"description": item[contentDescription_field],
-			"context_type": item[contextType_field],
+			"id": item[pkField],
+			"context_id": item[contextIdField],
+			"label": item[contextLabelField],
+			"description": item[contentDescriptionField],
+			"context_type": item[contextTypeField],
 			"stratigraphy": mapStratigraphy(item["stratigraphy"])
 		}
-		if(contextId_field != contextLabel_field) {
-			let nl = item[contextLabel_field] == null ? "-" : item[contextLabel_field];
+		if(contextIdField != contextLabelField) {
+			let nl = item[contextLabelField] == null ? "-" : item[contextLabelField];
 			nitem["label"] = nl;
 		}
 		mapped.push(nitem);
@@ -230,17 +230,17 @@ function mapItems(items) {
 }
 
 function mapStratigraphy(stratigraphyObject) {
-	if (contextId_field == "context_id") return stratigraphyObject;
+	if (contextIdField == "context_id") return stratigraphyObject;
 	var ns = {};
 	for (let si in stratigraphyObject) {
 		var stratigraphy = stratigraphyObject[si];
-		if (stratigraphy["this_context"][contextId_field]) {
-			stratigraphy["this_context"]["context_id"] = stratigraphy["this_context"][contextId_field];
-			delete stratigraphy["this_context"][contextId_field];
+		if (stratigraphy["this_context"][contextIdField]) {
+			stratigraphy["this_context"]["context_id"] = stratigraphy["this_context"][contextIdField];
+			delete stratigraphy["this_context"][contextIdField];
 		}
-		if (stratigraphy["other_context"][contextId_field]) {
-			stratigraphy["other_context"]["context_id"] = stratigraphy["other_context"][contextId_field];
-			delete stratigraphy["other_context"][contextId_field];
+		if (stratigraphy["other_context"][contextIdField]) {
+			stratigraphy["other_context"]["context_id"] = stratigraphy["other_context"][contextIdField];
+			delete stratigraphy["other_context"][contextIdField];
 		}
 		ns[si] = stratigraphy;
 	}
@@ -474,20 +474,20 @@ export default {
 			setTimeout(function () { refreshHandler(); }, 500);
 		},
 		contextIdField: function (newVal, oldVal) {
-			contextId_field = newVal;
-			optFieldsChangedHandler("contextIdField", contextId_field, true);
+			contextIdField = newVal;
+			optFieldsChangedHandler("contextIdField", contextIdField, true);
         },
 		contextLabelField: function(newVal, oldVal) {
-			contextLabel_field = newVal;
-			optFieldsChangedHandler("contextLabelField", contextLabel_field, true);
+			contextLabelField = newVal;
+			optFieldsChangedHandler("contextLabelField", contextLabelField, true);
         },
 		contentDescriptionField: function(newVal, oldVal) {
-			contentDescription_field = newVal;
-			optFieldsChangedHandler("contentDescriptionField", contentDescription_field, true);
+			contentDescriptionField = newVal;
+			optFieldsChangedHandler("contentDescriptionField", contentDescriptionField, true);
         },
 		contextTypeField: function(newVal, oldVal) {
-			contextType_field = newVal;
-			optFieldsChangedHandler("contextTypeField", contextType_field, true);
+			contextTypeField = newVal;
+			optFieldsChangedHandler("contextTypeField", contextTypeField, true);
         },
         graphEngine: function(newVal, oldVal) {
 			graphEngine = newVal;
@@ -513,19 +513,15 @@ export default {
 			contextTypeField: props.contextTypeField,
 			graphEngine: props.graphEngine
 		});
-		contextProps = parseCProps(props.contextProps);			contextId_field = props.contextIdField;
-			contextLabel_field = props.contextLabelField;
-			contentDescription_field = props.contentDescriptionField;
-			contextType_field = props.contextTypeField;
-			pk_field = props.primaryKeyFieldKey;
+		contextProps = parseCProps(props.contextProps);			contextIdField = props.contextIdField;
+			contextLabelField = props.contextLabelField;
+			contentDescriptionField = props.contentDescriptionField;
+			contextTypeField = props.contextTypeField;
+			pkField = props.primaryKeyFieldKey;
 			
 			if (document.getElementById('info-close')) document.getElementById('info-close').addEventListener('click', function() {
 		        closeInfo();
 		    });
-			
-			// if (document.getElementById('div-graph')) document.getElementById('div-graph').addEventListener('click', function() {
-		  //       closeInfo();
-		  //   });
 			
 			// PERSISTENCE
 			currentSplines = props.spline;

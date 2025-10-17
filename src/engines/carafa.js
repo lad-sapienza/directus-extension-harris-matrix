@@ -3,6 +3,17 @@ var JGFModule = require("../utils/jgf.js");
 var CarafaGraph = require("../libs/carafa_graph.js");
 var jgf;
 
+// Stratigraphic relationship type constants
+const RELATIONSHIP_TYPES = {
+	ABOVE: ['fills', 'covers', 'cuts', 'leans against'],
+	BELOW: ['is filled by', 'is covered by', 'is cut by', 'carries'],
+	CONTEMPORARY: ['is the same as', 'is bound to']
+};
+
+/**
+ * Configuration for JSON Graph Format generation
+ * @type {Object}
+ */
 const jgfConfig = {
     "context_id": "context_id",
     "context_type": "context_type",
@@ -21,6 +32,10 @@ const engineVersion = function() {
 	return "Carafa engine *** v0.1 ***";
 }
 
+/**
+ * Exports the current graph in JSON Graph Format
+ * @returns {string|null} JGF stringified data or null if no graph exists
+ */
 const fetchDataPackage = function() {
     if(jgf) {
        return jgf.stringify();
@@ -28,6 +43,12 @@ const fetchDataPackage = function() {
     return null;
 }
 
+/**
+ * Prepares a graph using Carafa algorithm (transitive reduction + clustering)
+ * @param {Array<Object>} graphItems - Array of context objects with stratigraphy data
+ * @param {Object} contextProps - Visual properties for each context type
+ * @returns {{graph: string, attributes: Object, error?: string}} DOT format graph with attributes
+ */
 const prepareGraph = function(graphItems, contextProps) {
 	let items = graphItems;
     
@@ -76,13 +97,13 @@ const prepareGraph = function(graphItems, contextProps) {
                     var source = node.context_id;
                     var target = otherContextId;
                     var directed = true;
-                    if (['fills', 'covers', 'cuts', 'leans against'].includes(relation)) {
-                        //Nothing to do here
-                    } else if (['is filled by', 'is covered by', 'is cut by', 'carries'].includes(relation)) {
-                        //Swap
+                    if (RELATIONSHIP_TYPES.ABOVE.includes(relation)) {
+                        // Source is above target (no swap needed)
+                    } else if (RELATIONSHIP_TYPES.BELOW.includes(relation)) {
+                        // Source is below target, swap direction
                         source = otherContextId;
                         target = node.context_id;
-                    } else if (['is the same as', 'is bound to'].includes(relation)) {
+                    } else if (RELATIONSHIP_TYPES.CONTEMPORARY.includes(relation)) {
                         directed = false;
                     } else {
                         HmLog.hmLog(`Not managed: ${relation}`);
