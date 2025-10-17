@@ -3,7 +3,7 @@ import { toRefs } from "vue";
 import { useItems, useCollection, useSync } from "@directus/extensions-sdk";
 import LyoutOptions from "./options.vue";
 import LayoutComponent from "./layout.vue";
-import { LayoutOptions } from "./types"; //Cleanup?
+// LayoutOptions type removed from JS runtime import (was only a TypeScript type)
 
 export default {
   id: "directus-harris-matrix-layout",
@@ -76,19 +76,20 @@ export default {
 		var contentDescriptionField = getSessionOptField("contentDescriptionField", "description");
 		var contextTypeField = getSessionOptField("contextTypeField", "context_type");
 
-		const queryFields = computed(() => {
-			var fields = [];
-			for (var lfvi in fieldsInCollection.value) {
-				let field = fieldsInCollection.value[lfvi].field;
-				if (field == "stratigraphy") { continue }
-				fields.push(field);
-			}
-			fields.push('stratigraphy.*.*');
-			//console.log("Query fields: " + JSON.stringify(fields))
-			return fields;
-		});
-		
-		const { info, primaryKeyField, fields: fieldsInCollection } = useCollection(collection);
+	const queryFields = computed(() => {
+		var fields = [];
+		for (var lfvi in fieldsInCollection.value) {
+			let field = fieldsInCollection.value[lfvi].field;
+			if (field == "stratigraphy") { continue }
+			fields.push(field);
+		}
+		// For O2M relationships, fetch relationship data AND the related context's context_id
+		fields.push('stratigraphy.id');
+		fields.push('stratigraphy.relationship');
+		fields.push('stratigraphy.this_context');
+		fields.push('stratigraphy.other_context.context_id');
+		return fields;
+	});		const { info, primaryKeyField, fields: fieldsInCollection } = useCollection(collection);
         var { 
 				items,
 				loading,
@@ -124,7 +125,7 @@ export default {
 			}
 			return itz;
 		});
-		
+
 		
 		const contextPropsDefault = `layer$shape=ellipse;tooltip=Layer
 

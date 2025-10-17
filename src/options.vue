@@ -129,7 +129,7 @@ const graphEngineWritable = useSync(props, 'graphEngine', emit);
 				value: 'standard',
 			},
 			{
-				text: 'Carafa',
+				text: 'Simplified',
 				value: 'carafa',
 			},
 		]" />

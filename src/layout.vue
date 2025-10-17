@@ -156,8 +156,11 @@ function setEngine() {
 }
 
 function buildGraph() {
+    console.log('===== BUILD GRAPH CALLED v2.0.22-DEBUG =====');
+    console.log('graphItems count:', graphItems.length);
     let now = new Date().getTime();
 	let graphElaboration = prepareGraph(graphItems, contextProps);
+    console.log('prepareGraph returned:', graphElaboration);
     let elapsed = new Date().getTime() - now;
     hmLog("Benchmark: " + graphItems.length + " items; " + elapsed + " ms;");
     if(graphElaboration) {
@@ -310,7 +313,9 @@ function displayGraph() {
 		}
 		if (currentGraph) {
 			let digraph = `digraph { splines=${currentSplines}; concentrated=${currentConcentrated}; ${currentGraph} }`;
-			hmLog("DIGRAPH V2:\n" + digraph);
+			hmLog("DIGRAPH V2 length: " + digraph.length + "\n" + digraph);
+			// Also emit to console so it's always visible
+			console.log("DIGRAPH V2 length:", digraph.length);
 			let svg = viz.renderSVGElement(digraph);
 			item.appendChild(svg);
 			[].forEach.call(document.querySelectorAll('g.node'), el => {
@@ -499,10 +504,16 @@ export default {
 			optFieldsChangedHandler = props.optFieldsChanged;
 			collection = props.collection;
 			console.log("Mounted: " + props.collection);
-			contextProps = parseCProps(props.contextProps);
-			console.log("Contexts Props: " + JSON.stringify(contextProps));
-
-			contextId_field = props.contextIdField;
+			// Debug info: show configured field names and initial items
+			console.log('[HM mount] configured fields:', {
+				primaryKeyFieldKey: props.primaryKeyFieldKey,
+			contextIdField: props.contextIdField,
+			contextLabelField: props.contextLabelField,
+			contentDescriptionField: props.contentDescriptionField,
+			contextTypeField: props.contextTypeField,
+			graphEngine: props.graphEngine
+		});
+		contextProps = parseCProps(props.contextProps);			contextId_field = props.contextIdField;
 			contextLabel_field = props.contextLabelField;
 			contentDescription_field = props.contentDescriptionField;
 			contextType_field = props.contextTypeField;
