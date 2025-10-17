@@ -37,17 +37,41 @@ const prepareGraph = function(graphItems, contextProps) {
 
     jgf = new JGFModule.JGF(jgfConfig);
     
+    // Create a map of valid node IDs to avoid referencing non-existent nodes
+    let validNodeIds = {};
+    for (var eidx in items) {
+        validNodeIds[items[eidx].context_id] = true;
+    }
+    
     for (var eidx in items) {
 		let node = items[eidx];
         jgf.addNode(node);
 
         if (node["stratigraphy"]) {
-            for (var cix in node["stratigraphy"]) {
-                let child = node["stratigraphy"][cix];
-                if (child["other_context"] == null) continue;
-                let otherContextId = child["other_context"]["context_id"];
-                
-                var relation = child["relationship"];
+            // normalize stratigraphy container
+            let strataContainer = node["stratigraphy"];
+            let strataEntries = [];
+            if (Array.isArray(strataContainer)) {
+                strataEntries = strataContainer;
+            } else if (strataContainer && typeof strataContainer === 'object') {
+                strataEntries = Object.keys(strataContainer).map(k => strataContainer[k]);
+            }
+
+            for (var cix in strataEntries) {
+                let child = strataEntries[cix];
+                if (!child) continue;
+
+                // tolerate nested 'data' wrapper
+                let other = child["other_context"] || child["other_context_id"] || child["other"];
+                if (other && other.data) other = other.data;
+                if (Array.isArray(other) && other.length) other = other[0];
+                let otherContextId = null;
+                if (other) otherContextId = other["context_id"] || other["id"] || other;
+                if (!otherContextId) continue;
+                // Skip edges to nodes that don't exist in the current filtered set
+                if (!validNodeIds[otherContextId]) continue;
+
+                var relation = child["relationship"] || child["relation"] || child["rel"] || child["type"] || child["relationship_type"];
                 if (relation) {
                     var source = node.context_id;
                     var target = otherContextId;
@@ -61,7 +85,7 @@ const prepareGraph = function(graphItems, contextProps) {
                     } else if (['is the same as', 'is bound to'].includes(relation)) {
                         directed = false;
                     } else {
-                        HmLog.hmLog(`Not managed: ${child["relationship"]}`);
+                        HmLog.hmLog(`Not managed: ${relation}`);
                         continue;
                     }
                     jgf.addEdge({"relation": relation, "source": source, "target": target, "directed": directed});

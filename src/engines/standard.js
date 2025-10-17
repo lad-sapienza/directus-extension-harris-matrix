@@ -38,56 +38,86 @@ const prepareGraph = function(graphItems, contextProps) {
 		}
 
         nodeProps.push(`label="${node.label}"`);
+
+        // Register the node even if it has no stratigraphy relations so isolated
+        // contexts are still rendered by the graph engine.
         let reg = {"node": node, "nodeProps": nodeProps};
-		
-		if (node["stratigraphy"]) {
-			for (var cix in node["stratigraphy"]) {
-				let child = node["stratigraphy"][cix];
-				var relation = "";
+        if (!nodesRegister[node["context_id"]]) {
+            nodesRegister[node["context_id"]] = reg;
+        }
 
-				if (child["other_context"] == null) continue;
-				let otherContextId = child["other_context"]["context_id"];
-				if (validTargets[otherContextId] == null) continue;
+        if (node["stratigraphy"]) {
 
-                if (child["relationship"]) {
-					if (['fills', 'covers', 'cuts', 'leans against'].includes(child["relationship"])) {
-						relation = `"${node["context_id"]}" -> "${otherContextId}";`;
-                        nodesRegister[node["context_id"]] = reg;
-					} else if (['is filled by', 'is covered by', 'is cut by', 'carries'].includes(child["relationship"])) {
-						relation = `"${otherContextId}" -> "${node["context_id"]}";`;
-                        nodesRegister[node["context_id"]] = reg;
-					} else if (['is the same as', 'is bound to'].includes(child["relationship"])) {
-						let subRelation = `"${otherContextId}" -> "${node["context_id"]}" [style="dashed", color="blue", dir="none"];`;
-                        var sg = subGraphsSubscriptions[otherContextId];
-                        if (sg) {
-                            sg["nodes"].push(reg);
-                            if (!sg["relations"].includes(subRelation)) {
-                                sg["relations"].push(subRelation);
-                            }
-                        } else {
-                            const sgid = `subg_${subGraphId}`;
-                            subGraphId++;
-                            var nsg = { "id": sgid }
-                            subGraphsSubscriptions[node["context_id"]] = nsg;
-                            var sgnodes = [reg];
-                            if (nodesRegister[otherContextId]) {
-                                sgnodes.push(nodesRegister[otherContextId]);
-                                delete nodesRegister[otherContextId];
-                                subGraphsSubscriptions[otherContextId] = nsg;
-                            }
-                            nsg["nodes"] = sgnodes;
-                            nsg["relations"] = [subRelation];
-                            subGraphs[sgid] = nsg;
+            // normalize stratigraphy: accept object-map or array
+            let strataContainer = node["stratigraphy"];
+            let strataEntries = [];
+            if (Array.isArray(strataContainer)) {
+                strataEntries = strataContainer;
+            } else if (strataContainer && typeof strataContainer === 'object') {
+                // if it's an object with keys, iterate values
+                strataEntries = Object.keys(strataContainer).map(k => strataContainer[k]);
+            }
+
+            for (var cix in strataEntries) {
+                let child = strataEntries[cix];
+                var relation = "";
+
+                // tolerate nested 'data' wrapper used by Directus relations
+                if (child == null) continue;
+                let other = child["other_context"] || child["other_context_id"] || child["other"];
+                if (other && other.data) other = other.data;
+                // if it's array take first
+                if (Array.isArray(other) && other.length) other = other[0];
+                let otherContextId = null;
+                if (other) {
+                    otherContextId = other["context_id"] || other["id"] || other;
+                }
+                if (!otherContextId) continue;
+                if (validTargets[otherContextId] == null) continue;
+
+                let rel = child["relationship"] || child["relation"] || child["rel"] || child["type"] || child["relationship_type"];
+                if (!rel) {
+                    // nothing to do
+                    continue;
+                }
+
+                if (['fills', 'covers', 'cuts', 'leans against'].includes(rel)) {
+                    relation = `"${node["context_id"]}" -> "${otherContextId}";`;
+                    nodesRegister[node["context_id"]] = reg;
+                } else if (['is filled by', 'is covered by', 'is cut by', 'carries'].includes(rel)) {
+                    relation = `"${otherContextId}" -> "${node["context_id"]}";`;
+                    nodesRegister[node["context_id"]] = reg;
+                } else if (['is the same as', 'is bound to'].includes(rel)) {
+                    let subRelation = `"${otherContextId}" -> "${node["context_id"]}" [style="dashed", color="blue", dir="none"];`;
+                    var sg = subGraphsSubscriptions[otherContextId];
+                    if (sg) {
+                        sg["nodes"].push(reg);
+                        if (!sg["relations"].includes(subRelation)) {
+                            sg["relations"].push(subRelation);
                         }
-					} else {
-						HmLog.hmLog(`Not managed: ${child["relationship"]}`);
-					}
-				}
+                    } else {
+                        const sgid = `subg_${subGraphId}`;
+                        subGraphId++;
+                        var nsg = { "id": sgid }
+                        subGraphsSubscriptions[node["context_id"]] = nsg;
+                        var sgnodes = [reg];
+                        if (nodesRegister[otherContextId]) {
+                            sgnodes.push(nodesRegister[otherContextId]);
+                            delete nodesRegister[otherContextId];
+                            subGraphsSubscriptions[otherContextId] = nsg;
+                        }
+                        nsg["nodes"] = sgnodes;
+                        nsg["relations"] = [subRelation];
+                        subGraphs[sgid] = nsg;
+                    }
+                } else {
+                    HmLog.hmLog(`Not managed: ${rel}`);
+                }
 
-				if (relation != "" && !arcs.includes(relation)) {
-					arcs.push(relation);
-				}
-			}
+                if (relation != "" && !arcs.includes(relation)) {
+                    arcs.push(relation);
+                }
+            }
 		}
 	}
 
@@ -99,8 +129,8 @@ const prepareGraph = function(graphItems, contextProps) {
         addNodeAttibutes(node);
     });
     const subgraphs = buildSubGraphs(subGraphs);
-    
-	return {"graph": nodes.join("\n") + "\n" + arcs.join("\n") + "\n\n" + subgraphs.join("\n\n"), "attributes": nodesAttributes};
+
+    return {"graph": nodes.join("\n") + "\n" + arcs.join("\n") + "\n\n" + subgraphs.join("\n\n"), "attributes": nodesAttributes};
 }
 
 function buildSubGraphs(subGraphs) {
