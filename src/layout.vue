@@ -1,9 +1,9 @@
 <template>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 	<div class="layout-harris-matrix">
 		<div v-if="!loading">
 			<div id="div-graph"></div>
-            <a id="download-anchor" download="hmdj.json" title="download your hmdj file"><i class="fa-solid fa-download"></i></a>
+            <a id="download-anchor" download="hmdj.json" title="Download JGF file">⬇ JSON</a>
+            <button id="download-png" title="Download graph as PNG">⬇ PNG</button>
 		</div>
 		<div id="info">
 			<h2>
@@ -75,19 +75,57 @@
 }
 
 #download-anchor {
-    top: 10px;
-    left: calc(var(--content-padding) + 10px);
+    display: none !important;
     position: absolute;
-    padding: 4px;
-    background-color: var(--v-button-background-color);
+    top: 10px;
+    left: 40px;
+    padding: 6px 10px;
+    background-color: var(--theme--primary);
+    color: white;
     border-radius: 5px;
-    width: 2vw;
     text-align: center;
     cursor: pointer;
+    z-index: 100;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.2;
 }
 
-#download-anchor i {
+#download-anchor.show {
+    display: block !important;
+}
+
+#download-anchor:hover {
+    background-color: var(--theme--primary-accent);
+}
+
+#download-png {
+    display: none;
+    position: absolute;
+    top: 10px;
+    left: 120px;
+    padding: 6px 10px;
+    background-color: var(--theme--primary);
     color: white;
+    border: none;
+    border-radius: 5px;
+    text-align: center;
+    cursor: pointer;
+    z-index: 100;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.2;
+}
+
+#download-png.show {
+    display: block !important;
+}
+
+#download-png:hover {
+    background-color: var(--theme--primary-accent);
 }
 </style>
 
@@ -95,12 +133,9 @@
 // https://github.com/codihaus/directus-extension-grid-layout/blob/main/src/options.vue
 
 import { onMounted } from 'vue';
-import { toRefs, toRef } from 'vue';
 import { instance } from "@viz-js/viz";
-import { useItems, useCollection, useSync } from '@directus/extensions-sdk';
-import { useApi, useStores } from '@directus/extensions-sdk';
 import svgPanZoom from "svg-pan-zoom";
-import { getCurrentInstance } from 'vue';
+import { useRouter } from 'vue-router';
 
 import { setHmLogging,  hmLog } from './utils/hmlog.js';
 
@@ -112,7 +147,6 @@ var currentItems = [];
 var graphItems = [];
 var currentGraph = null;
 var currentSplines = 'ortho';
-var currentConcentrated = false;
 var currentContextType = null;
 var nodesAttributes = {};
 var contextProps = {};
@@ -127,9 +161,6 @@ var contentDescriptionField = "";
 var contextTypeField = "";
 
 var pkField = "";
-
-let toogleInfo = false;
-
 
 var graphEngine = "standard";
 
@@ -171,27 +202,142 @@ function buildGraph() {
 }
 
 function setDownloadButton() {
-    if (document.getElementById('download-anchor')) {
+    hmLog("setDownloadButton called");
+    const anchor = document.getElementById('download-anchor');
+    const pngButton = document.getElementById('download-png');
+    hmLog("anchor element: " + (anchor ? "FOUND" : "NOT FOUND"));
+    hmLog("PNG button element: " + (pngButton ? "FOUND" : "NOT FOUND"));
+    hmLog("fetchDataPackage: " + (fetchDataPackage ? "EXISTS (type: " + typeof fetchDataPackage + ")" : "NULL"));
+    
+    if (anchor) {
         if(fetchDataPackage) {
-            var dataPackage = fetchDataPackage(false);
-            hmLog("Data package:");
-            hmLog(dataPackage);
-            
-            const m = new Date();
-            var dateString = m.getUTCFullYear() + "-" +
-                    ("0" + (m.getUTCMonth()+1)).slice(-2) + "-" +
-                    ("0" + m.getUTCDate()).slice(-2) + "-" +
-                    ("0" + m.getHours()).slice(-2) + "." +
-                    ("0" + m.getMinutes()).slice(-2) + "." +
-                    ("0" + m.getSeconds()).slice(-2);
-            
-            var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(dataPackage);
-            document.getElementById('download-anchor').href = dataStr;
-            document.getElementById('download-anchor').download = `c_export-${dateString}.json`;
-            document.getElementById('download-anchor').style.display = "block";
+            hmLog("Calling fetchDataPackage...");
+            try {
+                var dataPackage = fetchDataPackage(false);
+                hmLog("Data package length: " + (dataPackage ? dataPackage.length : "null"));
+                
+                const m = new Date();
+                var dateString = m.getUTCFullYear() + "-" +
+                        ("0" + (m.getUTCMonth()+1)).slice(-2) + "-" +
+                        ("0" + m.getUTCDate()).slice(-2) + "-" +
+                        ("0" + m.getHours()).slice(-2) + "." +
+                        ("0" + m.getMinutes()).slice(-2) + "." +
+                        ("0" + m.getSeconds()).slice(-2);
+                
+                var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(dataPackage);
+                anchor.href = dataStr;
+                anchor.download = `c_export-${dateString}.json`;
+                anchor.classList.add('show');
+                hmLog("Download button SHOWN (class 'show' added)");
+            } catch (error) {
+                hmLog("ERROR in fetchDataPackage: " + error.message);
+                anchor.classList.remove('show');
+            }
         } else {
-            document.getElementById('download-anchor').style.display = "none";
+            anchor.classList.remove('show');
+            hmLog("Download button HIDDEN (no fetchDataPackage)");
         }
+    } else {
+        hmLog("ERROR: anchor element NOT found in DOM");
+    }
+    
+    // PNG button is always visible when there's a graph
+    if (pngButton && currentGraph) {
+        pngButton.classList.add('show');
+        hmLog("PNG download button SHOWN");
+    } else if (pngButton) {
+        pngButton.classList.remove('show');
+        hmLog("PNG download button HIDDEN (no graph)");
+    }
+}
+
+function downloadGraphAsPNG() {
+    hmLog("downloadGraphAsPNG called");
+    const svgOriginal = document.querySelector("#div-graph svg");
+    if (!svgOriginal) {
+        hmLog("ERROR: No SVG found");
+        return;
+    }
+    
+    try {
+        // Clone the SVG to avoid modifying the original
+        const svg = svgOriginal.cloneNode(true);
+        
+        // Remove pan-zoom controls from the clone
+        const controls = svg.querySelector('#svg-pan-zoom-controls');
+        if (controls) {
+            controls.remove();
+            hmLog("Pan-zoom controls removed from export");
+        }
+        
+        // Get the bounding box of all content
+        const bbox = svgOriginal.getBBox();
+        const padding = 20;
+        
+        // Calculate dimensions including all content
+        const width = Math.ceil(bbox.x + bbox.width + padding);
+        const height = Math.ceil(bbox.y + bbox.height + padding);
+        
+        hmLog("BBox: x=" + bbox.x + ", y=" + bbox.y + ", width=" + bbox.width + ", height=" + bbox.height);
+        hmLog("Canvas dimensions: " + width + "x" + height);
+        
+        // Set explicit dimensions on the cloned SVG
+        svg.setAttribute('width', width);
+        svg.setAttribute('height', height);
+        svg.setAttribute('viewBox', '0 0 ' + width + ' ' + height);
+        
+        // Create a canvas with scale factor for better quality
+        const scale = 2;
+        const canvas = document.createElement('canvas');
+        canvas.width = width * scale;
+        canvas.height = height * scale;
+        const ctx = canvas.getContext('2d');
+        ctx.scale(scale, scale);
+        
+        // Set white background
+        ctx.fillStyle = 'white';
+        ctx.fillRect(0, 0, width, height);
+        
+        // Serialize SVG to string
+        const serializer = new XMLSerializer();
+        let svgString = serializer.serializeToString(svg);
+        
+        // Create blob and image
+        const blob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        
+        const img = new Image();
+        img.onload = function() {
+            ctx.drawImage(img, 0, 0);
+            URL.revokeObjectURL(url);
+            
+            // Convert canvas to PNG and download
+            canvas.toBlob(function(blob) {
+                const m = new Date();
+                const dateString = m.getUTCFullYear() + "-" +
+                        ("0" + (m.getUTCMonth()+1)).slice(-2) + "-" +
+                        ("0" + m.getUTCDate()).slice(-2) + "-" +
+                        ("0" + m.getHours()).slice(-2) + "." +
+                        ("0" + m.getMinutes()).slice(-2) + "." +
+                        ("0" + m.getSeconds()).slice(-2);
+                
+                const downloadUrl = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = downloadUrl;
+                a.download = `harris_matrix-${dateString}.png`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(downloadUrl);
+                hmLog("PNG download completed");
+            });
+        };
+        img.onerror = function(error) {
+            hmLog("ERROR loading SVG image: " + error);
+        };
+        img.src = url;
+    } catch (error) {
+        hmLog("ERROR in downloadGraphAsPNG: " + error.message);
     }
 }
 
@@ -281,7 +427,16 @@ function prependRecordLink(to, attrs) {
         let label = attrs.label == null ? "record" : attrs.label;
         let div = document.createElement("div");
         div.classList.add("resource_linker");
-        div.innerHTML = `<a href="./content/${collection}/${attrs.id}" style="cursor: pointer;">View ${label}</a>`;
+        div.style.cursor = "pointer";
+        div.style.color = "var(--theme--primary)";
+        div.style.textDecoration = "underline";
+        div.textContent = `View ${label}`;
+        div.addEventListener('click', function() {
+            closeInfo();
+            if (window._directusRouter) {
+                window._directusRouter.push(`/content/${collection}/${attrs.id}`);
+            }
+        });
         to.prepend(div);
 }
 
@@ -312,9 +467,14 @@ function displayGraph() {
 			item.removeChild(item.firstChild)
 		}
 		if (currentGraph) {
-			let digraph = `digraph { splines=${currentSplines}; concentrated=${currentConcentrated}; ${currentGraph} }`;
+			let digraph = `digraph { splines=${currentSplines}; ${currentGraph} }`;
 			hmLog("DIGRAPH V2 length: " + digraph.length + "\n" + digraph);
-			let svg = viz.renderSVGElement(digraph);
+			
+			// Apply transitive reduction only for Carafa engine
+			// Standard engine shows all relationships without reduction
+			const renderOptions = graphEngine === "carafa" ? { reduce: true } : {};
+			
+			let svg = viz.renderSVGElement(digraph, renderOptions);
 			item.appendChild(svg);
 			[].forEach.call(document.querySelectorAll('g.node'), el => {
 				el.addEventListener('click', function () {
@@ -397,10 +557,6 @@ export default {
 			type: String,
 			default: 'ortho',
 		},
-		concentrated: {
-			type: Boolean,
-			default: false,
-		},
 		consoleLogging: {
 			type: Boolean,
 			default: false,
@@ -440,11 +596,6 @@ export default {
         spline: function(newVal, oldVal) {
             currentSplines = newVal;
 			optFieldsChangedHandler("spline", currentSplines, false);
-            displayGraph();
-        },
-        concentrated: function(newVal, oldVal) {
-            currentConcentrated = newVal;
-			optFieldsChangedHandler("concentrated", currentConcentrated, false);
             displayGraph();
         },
         contextType: function(newVal, oldVal) {
@@ -497,6 +648,11 @@ export default {
         }
     },
     setup(props, context) {
+		const router = useRouter();
+		
+		// Make router available globally for prependRecordLink function
+		window._directusRouter = router;
+		
 	    onMounted(() => {
 			refreshHandler = props.refresh;
 			optFieldsChangedHandler = props.optFieldsChanged;
@@ -519,9 +675,12 @@ export default {
 		        closeInfo();
 		    });
 			
+			if (document.getElementById('download-png')) document.getElementById('download-png').addEventListener('click', function() {
+		        downloadGraphAsPNG();
+		    });
+			
 			// PERSISTENCE
 			currentSplines = props.spline;
-			currentConcentrated = props.currentConcentrated;
 			currentContextType = props.contextType;
 			graphEngine = props.graphEngine;
 

@@ -7,7 +7,6 @@ interface Props {
 	fields: string[];
 	activeFields: Field[];
 	spline: 'none' | 'line' | 'polyline' | 'curved' | 'ortho' | 'spline';
-	concentrated: true | false;
 	contextType: string;
 	contextTypes: Array<String>;
 	consoleLogging: true | false;
@@ -29,7 +28,6 @@ const emit = defineEmits([
 	'update:spline',
 	'update:activeFields',
 	'update:fields',
-	'update:concentrated',
 	'update:contextType',
 	'update:consoleLogging',
 	'update:contextProps',
@@ -41,7 +39,6 @@ const emit = defineEmits([
 ]);
 
 const splineWritable = useSync(props, 'spline', emit);
-const concentratedWritable = useSync(props, 'concentrated', emit);
 const contextTypeWritable = useSync(props, 'contextType', emit);
 const consoleLoggingWritable = useSync(props, 'consoleLogging', emit);
 const contextPropsWritable = useSync(props, 'contextProps', emit);
@@ -87,11 +84,7 @@ const graphSimplificationWritable = computed({
 	</div>
 	<div class="field">
 		<div class="type-label">Simplified graph</div>
-		<v-checkbox v-model="graphSimplificationWritable" label="Apply transitive reduction and clustering (Carafa algorithm)" class="block"></v-checkbox>
-	</div>
-	<div class="field">
-		<div class="type-label">Edge bundling</div>
-		<v-checkbox v-model="concentratedWritable" label="Merge parallel edges to reduce clutter (concentrated mode)" class="block"></v-checkbox>
+		<v-checkbox v-model="graphSimplificationWritable" label="Apply transitive reduction and node clustering (Carafa algorithm)" class="block"></v-checkbox>
 	</div>
 	<div class="field" id="hm-cprops">
 		<div class="type-label">Context Properties</div>

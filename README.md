@@ -89,16 +89,18 @@ CREATE TABLE stratigraphic_relationships (
 
 The extension provides two visualization engines:
 
-### Standard Engine (default)
-- Generates simple directed acyclic graphs (DAG)
+### Standard Engine
+- Shows all stratigraphic relationships without simplification
 - Groups contemporary contexts (same as/bound to) into subgraphs with dashed blue lines
-- Best for: Basic stratigraphic sequences
+- Best for: Small to medium stratigraphic sequences where seeing all relationships is important
 
-### Carafa Engine
-- Applies transitive reduction to simplify complex relationships
-- Automatic clustering of related contexts
+### Carafa Engine (recommended)
+- Applies transitive reduction using Graphviz's built-in algorithm to remove redundant edges
+- Automatically clusters related contemporary contexts into single nodes
 - Exports JSON Graph Format (JGF) data
 - Best for: Large, complex archaeological sites with many relationships
+
+The Carafa engine simplifies complex graphs by removing redundant edges (transitive reduction) and merging contemporary contexts into clusters, making large stratigraphic sequences easier to understand and visualize.
 
 ## Credits
 

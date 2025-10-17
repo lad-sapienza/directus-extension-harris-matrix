@@ -137,7 +137,6 @@ structure$shape=box;style=filled;fillcolor=#ebebeb;tooltip=Structure
 		
 							 
 	const spline = getSessionOptField("spline", 'Ortho');
-    const concentrated = getSessionOptField("concentrated", true) == "true";
     const contextType = getSessionOptField("contextType", null);
 	const consoleLogging = getSessionOptField("consoleLogging", false) == "true";
 	const primaryKeyFieldKey = primaryKeyField.value.field;
@@ -155,7 +154,6 @@ structure$shape=box;style=filled;fillcolor=#ebebeb;tooltip=Structure
             fieldsInCollection,
             error,
             spline,
-            concentrated,
             contextType,
 						selection,
 						getItems,
