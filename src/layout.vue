@@ -133,7 +133,7 @@ let toogleInfo = false;
 
 var graphEngine = "standard";
 
-var prepareGraph = function() { console.log("******** ENGINE NOT SET *********"); }
+var prepareGraph = function() { hmLog("******** ENGINE NOT SET *********"); }
 var engineVersion = "******** ENGINE NOT SET *********";
 var fetchDataPackage = null;
 
@@ -147,7 +147,7 @@ function setEngine() {
 		engineVersion = CarafaEngine.engineVersion;
         fetchDataPackage = CarafaEngine.fetchDataPackage;
 	} else {
-		prepareGraph = function() { console.log("******** ENGINE NOT SET *********"); }
+		prepareGraph = function() { hmLog("******** ENGINE NOT SET *********"); }
 		engineVersion = "******** ENGINE NOT SET *********";
         fetchDataPackage = null;
 	}
@@ -156,11 +156,11 @@ function setEngine() {
 }
 
 function buildGraph() {
-    console.log('===== BUILD GRAPH CALLED v2.0.22-DEBUG =====');
-    console.log('graphItems count:', graphItems.length);
+    hmLog('===== BUILD GRAPH CALLED v2.0.22-DEBUG =====');
+    hmLog('graphItems count:', graphItems.length);
     let now = new Date().getTime();
 	let graphElaboration = prepareGraph(graphItems, contextProps);
-    console.log('prepareGraph returned:', graphElaboration);
+    hmLog('prepareGraph returned:', graphElaboration);
     let elapsed = new Date().getTime() - now;
     hmLog("Benchmark: " + graphItems.length + " items; " + elapsed + " ms;");
     if(graphElaboration) {
@@ -314,8 +314,6 @@ function displayGraph() {
 		if (currentGraph) {
 			let digraph = `digraph { splines=${currentSplines}; concentrated=${currentConcentrated}; ${currentGraph} }`;
 			hmLog("DIGRAPH V2 length: " + digraph.length + "\n" + digraph);
-			// Also emit to console so it's always visible
-			console.log("DIGRAPH V2 length:", digraph.length);
 			let svg = viz.renderSVGElement(digraph);
 			item.appendChild(svg);
 			[].forEach.call(document.querySelectorAll('g.node'), el => {
@@ -458,8 +456,8 @@ export default {
             displayGraph();
         },
         consoleLogging: function(newVal, oldVal) {
-			console.log("Console log: " + (newVal == true ? "ON" : "OFF"));
-            setHmLogging(newVal);
+			
+      setHmLogging(newVal);
 			optFieldsChangedHandler("consoleLogging", newVal, false);
         },
 		contextProps: function(newVal, oldVal) {
@@ -503,16 +501,14 @@ export default {
 			refreshHandler = props.refresh;
 			optFieldsChangedHandler = props.optFieldsChanged;
 			collection = props.collection;
-			console.log("Mounted: " + props.collection);
+			hmLog("Mounted: " + props.collection);
 			// Debug info: show configured field names and initial items
-			console.log('[HM mount] configured fields:', {
-				primaryKeyFieldKey: props.primaryKeyFieldKey,
-			contextIdField: props.contextIdField,
-			contextLabelField: props.contextLabelField,
-			contentDescriptionField: props.contentDescriptionField,
-			contextTypeField: props.contextTypeField,
-			graphEngine: props.graphEngine
-		});
+			hmLog('[HM mount] configured fields: primaryKeyFieldKey=' + props.primaryKeyFieldKey + 
+				', contextIdField=' + props.contextIdField +
+				', contextLabelField=' + props.contextLabelField +
+				', contentDescriptionField=' + props.contentDescriptionField +
+				', contextTypeField=' + props.contextTypeField +
+				', graphEngine=' + props.graphEngine);
 		contextProps = parseCProps(props.contextProps);			contextIdField = props.contextIdField;
 			contextLabelField = props.contextLabelField;
 			contentDescriptionField = props.contentDescriptionField;
@@ -529,12 +525,11 @@ export default {
 			currentContextType = props.contextType;
 			graphEngine = props.graphEngine;
 
-			console.log("Setting engine...");
-			setEngine();
-
 			let clState = props.consoleLogging == true ? "ON" : "OFF";
-			console.log(`Setting console logging: ${clState}`);
 			setHmLogging(props.consoleLogging);
+			hmLog(`Setting console logging: ${clState}`);
+			hmLog("Setting engine...");
+			setEngine();
 		});
 	},
 };
