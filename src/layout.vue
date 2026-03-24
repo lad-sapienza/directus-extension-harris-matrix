@@ -274,17 +274,19 @@ function downloadGraphAsPNG() {
         const bbox = svgOriginal.getBBox();
         const padding = 20;
         
-        // Calculate dimensions including all content
-        const width = Math.ceil(bbox.x + bbox.width + padding);
-        const height = Math.ceil(bbox.y + bbox.height + padding);
-        
+        // Calculate viewBox starting at bbox origin (accounts for negative coords after panning)
+        const vbX = Math.floor(bbox.x) - padding;
+        const vbY = Math.floor(bbox.y) - padding;
+        const width = Math.ceil(bbox.width) + padding * 2;
+        const height = Math.ceil(bbox.height) + padding * 2;
+
         hmLog("BBox: x=" + bbox.x + ", y=" + bbox.y + ", width=" + bbox.width + ", height=" + bbox.height);
         hmLog("Canvas dimensions: " + width + "x" + height);
-        
+
         // Set explicit dimensions on the cloned SVG
         svg.setAttribute('width', width);
         svg.setAttribute('height', height);
-        svg.setAttribute('viewBox', '0 0 ' + width + ' ' + height);
+        svg.setAttribute('viewBox', vbX + ' ' + vbY + ' ' + width + ' ' + height);
         
         // Create a canvas with scale factor for better quality
         const scale = 2;
