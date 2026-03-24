@@ -36,14 +36,14 @@ jobs:
         uses: jaywcjlove/github-action-read-file@main
         with:
           branch: main
-          path: release.ver
-      
+          path: bin/release.ver
+
       - name: 📄 Read version changelog
         id: version-chl
         uses: jaywcjlove/github-action-read-file@main
         with:
           branch: main
-          path: release.chl
+          path: bin/release.chl
 
       - name: 🛠️ Create Release
         id: create_release

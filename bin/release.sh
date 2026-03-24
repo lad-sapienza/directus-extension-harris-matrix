@@ -1,5 +1,5 @@
-RELEASE_VER="release.ver"
-RELEASE_CHL="release.chl"
+RELEASE_VER="bin/release.ver"
+RELEASE_CHL="bin/release.chl"
 echo "******************************************************"
 echo "****** DIRECTUS HARRIS MATRIX RELEASE PROCEDURE ******"
 echo "******************************************************"
@@ -33,7 +33,8 @@ if [[ "$USE_JQ" == "N" ]]; then
 fi
 
 
-SCRIPT_PATH="$(dirname "$0")"
+# Always cd to project root (one level up from this script)
+SCRIPT_PATH="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$SCRIPT_PATH"
 
 CURRENT_PATH=$(pwd)
@@ -44,6 +45,13 @@ echo "Working branch: $CURRENT_BRANCH"
 if [[ "$CURRENT_BRANCH" != "develop" ]]; then
     echo ""
     echo "This procedure is meant to run on develop branch only! Exiting..."
+    echo ""
+    exit 1
+fi
+
+if ! git diff --quiet || ! git diff --cached --quiet; then
+    echo ""
+    echo "ERROR: Working tree has uncommitted changes. Commit or stash them first."
     echo ""
     exit 1
 fi
@@ -82,7 +90,7 @@ if [[ "$RELEASE_MODE" != "J" ]]; then
         INC=$((${CVD_SPLIT[2]} + 1))
         NEXT_VERSION_NUM="${CVD_SPLIT[0]}.${CVD_SPLIT[1]}.$INC"
     fi
-    
+
     NEXT_VERSION="v$NEXT_VERSION_NUM"
 
     > "$RELEASE_CHL"
@@ -151,6 +159,13 @@ sed -i.bak "s/^date-released: .*/date-released: $(date +"%Y-%m-%d")/" CITATION.c
 rm -f CITATION.cff.bak
 
 echo "$NEXT_VERSION" > "$RELEASE_VER"
+
+echo ""
+echo "Building..."
+npm run build || { echo "Error: Build failed"; exit 1; }
+
+# Sync package-lock.json version without touching node_modules
+npm install --package-lock-only --ignore-scripts 2>/dev/null || true
 
 echo ""
 echo "Committing..."
