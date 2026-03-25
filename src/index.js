@@ -1,6 +1,6 @@
-import { ref, computed, watch } from "vue";
+import { ref, computed } from "vue";
 import { toRefs } from "vue";
-import { useItems, useCollection, useSync, useApi } from "@directus/extensions-sdk";
+import { useItems, useCollection, useSync } from "@directus/extensions-sdk";
 import LyoutOptions from "./options.vue";
 import LayoutComponent from "./layout.vue";
 // LayoutOptions type removed from JS runtime import (was only a TypeScript type)
@@ -144,56 +144,26 @@ structure$shape=box;style=filled;fillcolor=#ebebeb;tooltip=Structure
 	// Default to Carafa engine (simplified mode ON by default)
 	const graphEngine = getSessionOptField("graphEngine", "carafa");
 
-	// Fetch items that are sources of relationships pointing TO the current (filtered) items,
-	// so edges from outside the active filter are still visible in the graph.
-	const api = useApi();
-	const reverseItems = ref([]);
+	// Reactively fetch items that point TO the current items via stratigraphy.other_context,
+	// so reverse relationships are visible even when the source item is outside the active filter.
+	const reverseFilter = computed(() => {
+		const pks = (items.value ?? []).map(i => i[primaryKeyFieldKey]).filter(pk => pk != null);
+		if (!pks.length) return { [primaryKeyFieldKey]: { _null: true } }; // returns nothing
+		return { stratigraphy: { other_context: { _in: pks } } };
+	});
 
-	watch(items, async (newItems) => {
-		reverseItems.value = [];
-		if (!newItems?.length) return;
-
-		const pks = newItems.map(item => item[primaryKeyFieldKey]).filter(pk => pk != null);
-		if (!pks.length) return;
-
-		const existingPkSet = new Set(pks);
-
-		try {
-			const stratResp = await api.get('/items/stratigraphy', {
-				params: {
-					filter: { other_context: { _in: pks } },
-					fields: ['this_context'],
-					limit: -1,
-				}
-			});
-
-			const missingPks = [...new Set(
-				(stratResp.data?.data || [])
-					.map(r => r.this_context)
-					.filter(pk => pk != null && !existingPkSet.has(pk))
-			)];
-
-			if (!missingPks.length) return;
-
-			const sourceResp = await api.get(`/items/${collection.value}`, {
-				params: {
-					filter: { [primaryKeyFieldKey]: { _in: missingPks } },
-					fields: queryFields.value,
-					limit: -1,
-				}
-			});
-
-			reverseItems.value = sourceResp.data?.data || [];
-		} catch (e) {
-			console.warn('[HarrisMatrix] reverse-relationship fetch failed:', e);
-		}
+	const { items: reverseItems } = useItems(collection, {
+		filter: reverseFilter,
+		fields: queryFields,
+		limit: ref('-1'),
 	});
 
 	const allItems = computed(() => {
-		if (!reverseItems.value.length) return items.value ?? [];
-		const existingPks = new Set((items.value ?? []).map(i => i[primaryKeyFieldKey]));
-		const extras = reverseItems.value.filter(i => !existingPks.has(i[primaryKeyFieldKey]));
-		return [...(items.value ?? []), ...extras];
+		const base = items.value ?? [];
+		const extra = reverseItems.value ?? [];
+		if (!extra.length) return base;
+		const existingPks = new Set(base.map(i => i[primaryKeyFieldKey]));
+		return [...base, ...extra.filter(i => !existingPks.has(i[primaryKeyFieldKey]))];
 	});
 
 	return {
