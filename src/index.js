@@ -99,7 +99,7 @@ export default {
 				getItemCount,
 				getTotalCount,			
 		 } = useItems(collection, {
-            sort: primaryKeyField.field,
+            sort: computed(() => primaryKeyField.value?.field),
             limit: '-1',
             fields: queryFields, //['context_id', 'description', 'context_type', 'stratigraphy.*.*'],
             filter,
@@ -139,7 +139,7 @@ structure$shape=box;style=filled;fillcolor=#ebebeb;tooltip=Structure
 	const spline = getSessionOptField("spline", 'Ortho');
     const contextType = getSessionOptField("contextType", null);
 	const consoleLogging = getSessionOptField("consoleLogging", false) == "true";
-	const primaryKeyFieldKey = primaryKeyField.value.field;
+	const primaryKeyFieldKey = primaryKeyField.value?.field ?? 'id';
 
 	// Default to Carafa engine (simplified mode ON by default)
 	const graphEngine = getSessionOptField("graphEngine", "carafa");
@@ -147,8 +147,9 @@ structure$shape=box;style=filled;fillcolor=#ebebeb;tooltip=Structure
 	// Reactively fetch items that point TO the current items via stratigraphy.other_context,
 	// so reverse relationships are visible even when the source item is outside the active filter.
 	const reverseFilter = computed(() => {
-		const pks = (items.value ?? []).map(i => i[primaryKeyFieldKey]).filter(pk => pk != null);
-		if (!pks.length) return { [primaryKeyFieldKey]: { _null: true } }; // returns nothing
+		const pkField = primaryKeyField.value?.field ?? 'id';
+		const pks = (items.value ?? []).map(i => i[pkField]).filter(pk => pk != null);
+		if (!pks.length) return { [pkField]: { _null: true } }; // returns nothing
 		return { stratigraphy: { other_context: { _in: pks } } };
 	});
 
@@ -160,10 +161,11 @@ structure$shape=box;style=filled;fillcolor=#ebebeb;tooltip=Structure
 
 	const allItems = computed(() => {
 		const base = items.value ?? [];
-		const extra = reverseItems.value ?? [];
+		const extra = reverseItems?.value ?? [];
 		if (!extra.length) return base;
-		const existingPks = new Set(base.map(i => i[primaryKeyFieldKey]));
-		return [...base, ...extra.filter(i => !existingPks.has(i[primaryKeyFieldKey]))];
+		const pkField = primaryKeyField.value?.field ?? 'id';
+		const existingPks = new Set(base.map(i => i[pkField]));
+		return [...base, ...extra.filter(i => !existingPks.has(i[pkField]))];
 	});
 
 	return {

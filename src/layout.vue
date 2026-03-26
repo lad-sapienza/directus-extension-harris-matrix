@@ -163,6 +163,7 @@ var contextTypeField = "";
 var pkField = "";
 
 var graphEngine = "standard";
+var _router = null;
 
 var prepareGraph = function() { hmLog("******** ENGINE NOT SET *********"); }
 var engineVersion = "******** ENGINE NOT SET *********";
@@ -351,7 +352,7 @@ function resetInfo() {
 
 function closeInfo() {
 	resetInfo();
-	let svg = document.querySelector("#div-graph").querySelector('svg');
+	let svg = document.querySelector("#div-graph")?.querySelector('svg');
 	if (svg) svg.style.opacity = 1;
 	if (document.getElementById('info')) document.getElementById('info').style.display = "none";
 }
@@ -382,11 +383,11 @@ function mapStratigraphy(stratigraphyObject) {
 	var ns = {};
 	for (let si in stratigraphyObject) {
 		var stratigraphy = stratigraphyObject[si];
-		if (stratigraphy["this_context"][contextIdField]) {
+		if (stratigraphy["this_context"] && stratigraphy["this_context"][contextIdField]) {
 			stratigraphy["this_context"]["context_id"] = stratigraphy["this_context"][contextIdField];
 			delete stratigraphy["this_context"][contextIdField];
 		}
-		if (stratigraphy["other_context"][contextIdField]) {
+		if (stratigraphy["other_context"] && stratigraphy["other_context"][contextIdField]) {
 			stratigraphy["other_context"]["context_id"] = stratigraphy["other_context"][contextIdField];
 			delete stratigraphy["other_context"][contextIdField];
 		}
@@ -396,9 +397,10 @@ function mapStratigraphy(stratigraphyObject) {
 }
 
 function displayNodeInfos(node) {
-	let nid = node.querySelector('title').textContent;
+	let nid = node.querySelector('title')?.textContent;
+	if (!nid) return;
 	let attrs = nodesAttributes[nid];
-
+	if (!attrs) return;
 
     if(document.getElementById('action_container')) {
         document.querySelectorAll('.resource_linker').forEach(e => e.remove());
@@ -435,8 +437,8 @@ function prependRecordLink(to, attrs) {
         div.textContent = `View ${label}`;
         div.addEventListener('click', function() {
             closeInfo();
-            if (window._directusRouter) {
-                window._directusRouter.push(`/content/${collection}/${attrs.id}`);
+            if (_router) {
+                _router.push({ path: `/content/${collection}/${attrs.id}` });
             }
         });
         to.prepend(div);
@@ -653,12 +655,11 @@ export default {
 		const router = useRouter();
 		
 		// Make router available globally for prependRecordLink function
-		window._directusRouter = router;
-		
 	    onMounted(() => {
 			refreshHandler = props.refresh;
 			optFieldsChangedHandler = props.optFieldsChanged;
 			collection = props.collection;
+			_router = router;
 			hmLog("Mounted: " + props.collection);
 			// Debug info: show configured field names and initial items
 			hmLog('[HM mount] configured fields: primaryKeyFieldKey=' + props.primaryKeyFieldKey + 
